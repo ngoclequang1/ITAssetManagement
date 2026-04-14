@@ -6,6 +6,6 @@
         public int PersonInChargeId { get; set; }
 
         public int FirstApproverId { get; set; }
-        public int SecondApproverId { get; set; }
+        public int ? SecondApproverId { get; set; }
     }
 }

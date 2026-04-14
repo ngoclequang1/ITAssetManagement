@@ -44,7 +44,7 @@ namespace ITAssetManagement.Controllers
         }
 
         // ===============================
-        // 2. Get Hardware Detail
+        // 2. Get Hardware Detail 
         // ===============================
         [HttpGet("{id}")]
         public async Task<IActionResult> GetHardwareDetail(int id)
@@ -53,6 +53,7 @@ namespace ITAssetManagement.Controllers
                 .Include(a => a.Category)
                 .Include(a => a.Status)
                 .Include(a => a.Location)
+                .Include(a => a.Department) // BỔ SUNG: Join sang bảng Department
                 .Where(a => a.AssetId == id)
                 .Select(a => new
                 {
@@ -62,9 +63,11 @@ namespace ITAssetManagement.Controllers
                     a.Manufacturer,
                     a.Model,
                     a.SerialNumber,
-                    Category = a.Category.CategoryName,
-                    Status = a.Status.StatusName,
-                    Location = a.Location.LocationName
+                    a.DepartmentId, // Lấy ID phòng ban hiện tại
+                    DepartmentName = a.Department != null ? a.Department.DepartmentName : null, // Lấy Tên phòng ban hiện tại
+                    Category = a.Category != null ? a.Category.CategoryName : null,
+                    Status = a.Status != null ? a.Status.StatusName : null,
+                    Location = a.Location != null ? a.Location.LocationName : null
                 })
                 .FirstOrDefaultAsync();
 

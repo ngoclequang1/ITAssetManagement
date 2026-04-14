@@ -100,26 +100,27 @@ namespace ITAssetManagement.Controllers
                 NewValue = dto.MoveToDepartmentId.ToString()
             });
 
-            // 2 level approval
-            _context.RequestApprovals.AddRange(
-                new RequestApproval
+            _context.RequestApprovals.Add(new RequestApproval
+            {
+                RequestId = request.RequestId,
+                ApproverId = dto.FirstApproverId,
+                ApprovalLevel = 1,
+                StatusId = 1
+            });
+
+            // Kiểm tra: Nếu Frontend có gửi lên người duyệt cấp 2 (không bị null) thì mới tạo thêm
+            if (dto.SecondApproverId.HasValue)
+            {
+                _context.RequestApprovals.Add(new RequestApproval
                 {
                     RequestId = request.RequestId,
-                    ApproverId = dto.FirstApproverId,
-                    ApprovalLevel = 1,
-                    StatusId = 1
-                },
-                new RequestApproval
-                {
-                    RequestId = request.RequestId,
-                    ApproverId = dto.SecondApproverId,
+                    ApproverId = dto.SecondApproverId.Value,
                     ApprovalLevel = 2,
                     StatusId = 1
-                }
-            );
+                });
+            }
 
             await _context.SaveChangesAsync();
-
             return Ok("Move request created");
         }
 
@@ -173,6 +174,65 @@ namespace ITAssetManagement.Controllers
             }
 
             return Ok("Approved (waiting next level)");
+        }
+
+        // ===============================
+        // BỔ SUNG: REJECT REQUEST 
+        // ===============================
+        [HttpPut("{requestId}/reject")]
+        public async Task<IActionResult> RejectRequest(int requestId, [FromBody] ApproveRequestDto dto)
+        {
+            var request = await _context.Requests.FindAsync(requestId);
+            if (request == null) return NotFound();
+
+            var approval = await _context.RequestApprovals
+                .FirstOrDefaultAsync(a => a.RequestId == requestId && a.ApproverId == dto.ApproverId);
+
+            if (approval == null) return BadRequest("Not allowed");
+            if (approval.StatusId != 1) return BadRequest("Already processed");
+
+            // Cập nhật trạng thái Approval = 3 (Rejected)
+            approval.StatusId = 3;
+            approval.ApprovedAt = DateTime.Now;
+            approval.Remarks = dto.Remarks;
+
+            // Đánh rớt toàn bộ Request (StatusId = 3)
+            request.StatusId = 3;
+
+            _context.RequestHistories.Add(new RequestHistory
+            {
+                RequestId = requestId,
+                StatusId = 3,
+                UserCreatedId = request.UserCreatedId,
+                Remarks = "Rejected: " + dto.Remarks
+            });
+
+            await _context.SaveChangesAsync();
+            return Ok("Request rejected");
+        }
+
+        // ===============================
+        // BỔ SUNG: LẤY CÁC REQUEST CHỜ DUYỆT CỦA USER
+        // ===============================
+        [HttpGet("pending/{approverId}")]
+        public async Task<IActionResult> GetPendingApprovals(int approverId)
+        {
+            var pendingList = await _context.RequestApprovals
+                .Include(a => a.Request)
+                    .ThenInclude(r => r.RequestType)
+                .Where(a => a.ApproverId == approverId && a.StatusId == 1 && a.Request.StatusId == 1) // Chưa duyệt
+                .Select(a => new
+                {
+                    RequestId = a.RequestId,
+                    Type = a.Request.RequestType.TypeName,
+                    Description = a.Request.RequestDescription,
+                    CreatedAt = a.Request.CreatedAt,
+                    ApprovalLevel = a.ApprovalLevel
+                })
+                .OrderBy(a => a.CreatedAt)
+                .ToListAsync();
+
+            return Ok(pendingList);
         }
 
         // ===============================

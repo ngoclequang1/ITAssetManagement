@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ITAssetManagement.Models;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 [Table("request_approval")] 
@@ -24,4 +25,7 @@ public class RequestApproval
     public DateTime? ApprovedAt { get; set; }
 
     public string? Remarks { get; set; }
+
+    [ForeignKey("RequestId")]
+    public virtual Request Request { get; set; }
 }
