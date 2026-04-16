@@ -83,6 +83,7 @@ namespace ITAssetManagement.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateHardware([FromBody] ITAsset asset)
         {
+            asset.CreatedAt = DateTime.Now;
             _context.ITAssets.Add(asset);
             await _context.SaveChangesAsync();
 
