@@ -7,5 +7,7 @@
         public string DepartmentName { get; set; }
 
         public int? ParentDepartmentId { get; set; }
+
+        public bool IsKittingDepartment { get; set; }
     }
 }

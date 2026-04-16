@@ -234,6 +234,7 @@ namespace ITAssetManagement.Controllers
                 DepartmentCode = dto.DepartmentCode,
                 DepartmentName = dto.DepartmentName,
                 ParentDepartmentId = dto.ParentDepartmentId,
+                IsKittingDepartment = dto.IsKittingDepartment,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow
             };
