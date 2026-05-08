@@ -202,6 +202,8 @@ namespace ITAssetManagement.Controllers
             return Ok(newDepartment);
         }
 
+        
+
         // =========================
         // Create Department
         // =========================
@@ -248,5 +250,26 @@ namespace ITAssetManagement.Controllers
                 departmentId = department.DepartmentId
             });
         }
+
+        // =========================
+        // BỔ SUNG: Assign User to Department
+        // =========================
+        [HttpPost("{id}/assign-user")]
+        public async Task<IActionResult> AssignUserToDepartment(int id, [FromBody] AssignUserDto dto)
+        {
+            var department = await _context.Departments.FindAsync(id);
+            if (department == null)
+                return NotFound("Department not found");
+
+            var user = await _context.Users.FindAsync(dto.UserId);
+            if (user == null)
+                return NotFound("User not found");
+
+            // Chuyển PrimaryDepartmentId của user sang phòng ban này
+            user.PrimaryDepartmentId = id;
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "User assigned to department successfully" });
+        }
     }
-}
+} 

@@ -21,41 +21,79 @@ namespace ITAssetManagement.Controllers
         // 1. SEARCH SOFTWARE
         // ===============================
         [HttpPost("search")]
-        public async Task<IActionResult> SearchSoftware([FromBody] SoftwareSearchDto dto)
+public async Task<IActionResult> SearchSoftware([FromBody] SoftwareSearchDto dto)
+{
+    var query = _context.Softwares.AsQueryable();
+
+    if (!string.IsNullOrEmpty(dto.AssetControlNumber))
+    {
+        query = query.Where(s =>
+            s.Asset != null &&
+            s.Asset.AssetControlNumber.Contains(dto.AssetControlNumber));
+    }
+
+    if (!string.IsNullOrEmpty(dto.SoftwareName))
+    {
+        query = query.Where(s =>
+            s.SoftwareName.Contains(dto.SoftwareName));
+    }
+
+    if (!string.IsNullOrEmpty(dto.SoftwareVersion))
+    {
+        query = query.Where(s =>
+            s.SoftwareVersion != null &&
+            s.SoftwareVersion.Contains(dto.SoftwareVersion));
+    }
+
+    if (dto.VendorId.HasValue)
+    {
+        query = query.Where(s => s.VendorId == dto.VendorId);
+    }
+
+    if (dto.LicenseId.HasValue)
+    {
+        query = query.Where(s => s.LicenseId == dto.LicenseId);
+    }
+
+    if (!string.IsNullOrEmpty(dto.LicenseType))
+    {
+        query = query.Where(s => s.LicenseType == dto.LicenseType);
+    }
+
+    if (dto.GroupId.HasValue)
+    {
+        query = query.Where(s => s.GroupId == dto.GroupId);
+    }
+
+    var result = await query
+        .Include(s => s.Asset)
+        .Include(s => s.InstalledByUser)
+        .AsNoTracking()
+        .Select(s => new
         {
-            var query = _context.Softwares
-                .Include(s => s.Asset)
-                .AsQueryable();
+            softwareId = s.SoftwareId,
+            softwareName = s.SoftwareName,
+            installationName = s.SoftwareName,
 
-            if (!string.IsNullOrEmpty(dto.ControlNumber))
-            {
-                query = query.Where(s => s.Asset.AssetControlNumber.Contains(dto.ControlNumber));
-            }
+            softwareVersion = s.SoftwareVersion,
+            softwareType = s.SoftwareType ?? s.LicenseType,
 
-            if (!string.IsNullOrEmpty(dto.SoftwareName))
-            {
-                query = query.Where(s => s.SoftwareName.Contains(dto.SoftwareName));
-            }
+            assetControlNumber = s.Asset != null ? s.Asset.AssetControlNumber : null,
+            assetName = s.Asset != null ? s.Asset.AssetName : null,
 
-            if (!string.IsNullOrEmpty(dto.Version))
-            {
-                query = query.Where(s => s.SoftwareVersion.Contains(dto.Version));
-            }
+            licenseId = s.LicenseId,
+            groupId = s.GroupId,
 
-            var result = await query.Select(s => new
-            {
-                s.SoftwareId,
-                InstallationName = s.SoftwareName,
-                Publisher = s.VendorId,
-                ManagementLevel = 1,
-                LicenseStatus = s.LicenseId != null ? "Yes" : "None",
-                IsBasic = s.GroupId == null,
-                IsGrouped = s.GroupId != null
-            }).ToListAsync();
+            installedByName = s.InstalledByUser != null
+                ? s.InstalledByUser.Username
+                : null,
 
-            return Ok(result);
-        }
+            installedDate = s.InstalledDate
+        })
+        .ToListAsync();
 
+    return Ok(result);
+}
         // ===============================
         // 2. GROUP SOFTWARE
         // ===============================
