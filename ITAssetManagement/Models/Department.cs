@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
+[Table("DEPARTMENT")]
 public class Department
 {
     [Key]
@@ -31,6 +32,9 @@ public class Department
 
     [Column("is_active")]
     public bool IsActive { get; set; }
+
+    [Column("is_deleted")]
+    public bool IsDeleted { get; set; } = false;
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }

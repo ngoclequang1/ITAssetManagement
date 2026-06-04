@@ -32,6 +32,9 @@ namespace ITAssetManagement.Data
         public DbSet<RequestStatus> RequestStatuses { get; set; }
         public DbSet<RequestAsset> RequestAssets { get; set; }
         public DbSet<InventoryHistory> InventoryHistories { get; set; }
+
+        public DbSet<License> Licenses { get; set; }
+        public DbSet<LicenseInventoryHistory> LicenseInventoryHistories { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -40,6 +43,8 @@ namespace ITAssetManagement.Data
             modelBuilder.Entity<Department>().ToTable("DEPARTMENT");
             modelBuilder.Entity<PermissionRole>().ToTable("PERMISSION_ROLE");
             modelBuilder.Entity<ITAsset>().ToTable("IT_ASSET");
+            modelBuilder.Entity<License>().ToTable("LICENSE");
+            modelBuilder.Entity<LicenseInventoryHistory>().ToTable("LICENSE_INVENTORY_HISTORY");
 
             // User → Department
             modelBuilder.Entity<User>()
@@ -63,6 +68,41 @@ namespace ITAssetManagement.Data
                 .HasOne(ra => ra.Asset)
                 .WithMany()
                 .HasForeignKey(ra => ra.AssetId);
+
+            // License -> Department (Management Department)
+            modelBuilder.Entity<License>()
+                .HasOne(l => l.ManagementDepartment)
+                .WithMany()
+                .HasForeignKey(l => l.ManagementDepartmentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // License -> User (Manager)
+            modelBuilder.Entity<License>()
+                .HasOne(l => l.Manager)
+                .WithMany()
+                .HasForeignKey(l => l.ManagerUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // License -> License (Parent/Child for Split)
+            modelBuilder.Entity<License>()
+                .HasOne(l => l.ParentLicense)
+                .WithMany(l => l.ChildLicenses)
+                .HasForeignKey(l => l.ParentLicenseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // LicenseInventoryHistory -> License
+            modelBuilder.Entity<LicenseInventoryHistory>()
+                .HasOne(h => h.License)
+                .WithMany(l => l.InventoryHistories)
+                .HasForeignKey(h => h.LicenseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // LicenseInventoryHistory -> User
+            modelBuilder.Entity<LicenseInventoryHistory>()
+                .HasOne(h => h.InventoryTaker)
+                .WithMany()
+                .HasForeignKey(h => h.InventoryTakerId)
+                .OnDelete(DeleteBehavior.SetNull);
+            }
         }
-    }
 }

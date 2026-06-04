@@ -55,6 +55,9 @@
         [Column("reset_otp_expiry")]
         public DateTime? ResetOtpExpiry { get; set; }
 
+        [Column("is_deleted")]
+        public bool IsDeleted { get; set; } = false;
+
         // =========================
         // Navigation Properties
         // =========================

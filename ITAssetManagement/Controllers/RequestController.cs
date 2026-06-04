@@ -237,6 +237,8 @@ namespace ITAssetManagement.Controllers
 
         // ===============================
         // 4. APPLY REQUEST
+        // Router: phân loại IT Asset request vs License request
+        // dựa vào RequestDetail có field "application_type"
         // ===============================
         private async Task ApplyRequest(int requestId)
         {
@@ -246,37 +248,306 @@ namespace ITAssetManagement.Controllers
                 .Where(d => d.RequestId == requestId)
                 .ToListAsync();
 
-            // 🔹 CASE 1: SINGLE
-            if (request.AssetId != null)
+            // Kiểm tra đây có phải License request không
+            var appType = details.FirstOrDefault(d => d.FieldName == "application_type")?.NewValue;
+
+            if (appType != null && (appType.EndsWith("_LICENSE") || appType == "NEW_LICENSE"))
             {
-                var asset = await _context.ITAssets.FindAsync(request.AssetId);
-                ApplyToAsset(asset, details);
+                // 🔹 LICENSE REQUEST → xử lý riêng
+                await ApplyLicenseRequest(request, details, appType);
             }
             else
             {
-                // 🔹 CASE 2: BULK
-                var requestAssets = await _context.Set<RequestAsset>()
-                    .Where(x => x.RequestId == requestId)
-                    .ToListAsync();
-
-                foreach (var ra in requestAssets)
+                // 🔹 IT ASSET REQUEST — giữ nguyên logic cũ
+                if (request.AssetId != null)
                 {
-                    var asset = await _context.ITAssets.FindAsync(ra.AssetId);
+                    var asset = await _context.ITAssets.FindAsync(request.AssetId);
                     ApplyToAsset(asset, details);
+                }
+                else
+                {
+                    var requestAssets = await _context.Set<RequestAsset>()
+                        .Where(x => x.RequestId == requestId)
+                        .ToListAsync();
+
+                    foreach (var ra in requestAssets)
+                    {
+                        var asset = await _context.ITAssets.FindAsync(ra.AssetId);
+                        ApplyToAsset(asset, details);
+                    }
                 }
             }
 
-            request.StatusId = 2;
+            request.StatusId = 2; // Approved
 
             _context.RequestHistories.Add(new RequestHistory
             {
-                RequestId = requestId,
-                StatusId = 2,
+                RequestId     = requestId,
+                StatusId      = 2,
                 UserCreatedId = request.UserCreatedId,
-                Remarks = "Applied"
+                Action        = "Approved",
+                ActionBy      = request.UpdatedBy ?? "system",
+                ActionAt      = DateTime.UtcNow,
+                Remarks       = "Applied"
             });
 
             await _context.SaveChangesAsync();
+        }
+
+        // ===============================
+        // 4a. APPLY LICENSE REQUEST
+        // Dispatch theo application_type
+        // ===============================
+        private async Task ApplyLicenseRequest(Request request, List<RequestDetail> details, string appType)
+        {
+            switch (appType)
+            {
+                case "NEW_LICENSE":
+                    await ApplyNewLicense(request, details);
+                    break;
+                case "CHANGE_LICENSE":
+                    await ApplyChangeLicense(details);
+                    break;
+                case "MOVE_LICENSE":
+                    await ApplyMoveLicense(details);
+                    break;
+                case "SPLIT_LICENSE":
+                    await ApplySplitLicense(request, details);
+                    break;
+                case "DISPOSAL_LICENSE":
+                    await ApplyDisposalLicense(details);
+                    break;
+            }
+        }
+
+ // ===============================
+        // APPLY NEW LICENSE
+        //
+        // FIX: License record đã được tạo sẵn với status "Pending" tại
+        // LicenseController.NewApplication(). Ở đây chỉ cần:
+        //   1. Tìm license theo license_id lưu trong RequestDetail
+        //   2. Chuyển LicenseStatus: "Pending" → "Active"
+        //   3. Cập nhật NumberAvailable = NumberOfLicenses (sẵn sàng phân bổ)
+        // Không tạo License mới, không sinh LicenseManagementNumber mới.
+        // ===============================
+        private async Task ApplyNewLicense(Request request, List<RequestDetail> details)
+        {
+            // Lấy license_id đã lưu khi tạo request
+            var licenseIdStr = details.FirstOrDefault(d => d.FieldName == "license_id")?.NewValue;
+            if (!int.TryParse(licenseIdStr, out int licenseId))
+                throw new InvalidOperationException("license_id missing in NEW_LICENSE request. Cannot activate license.");
+ 
+            var license = await _context.Licenses.FindAsync(licenseId)
+                ?? throw new InvalidOperationException($"License {licenseId} not found.");
+ 
+            if (license.LicenseStatus != "Pending")
+                throw new InvalidOperationException(
+                    $"License {license.LicenseManagementNumber} is in status '{license.LicenseStatus}', expected 'Pending'.");
+ 
+            // Activate: chuyển Pending → Active, mở NumberAvailable
+            license.LicenseStatus   = "Active";
+            license.NumberAvailable = license.NumberOfLicenses;
+            license.UpdatedAt       = DateTime.UtcNow;
+            license.UpdatedBy       = request.UpdatedBy ?? "system";
+ 
+            // Ghi lại license_id vào RequestDetail để truy vết
+            _context.RequestDetails.Add(new RequestDetail
+            {
+                RequestId = request.RequestId,
+                FieldName = "activated_license_id",
+                NewValue  = license.LicenseId.ToString()
+            });
+        }
+
+        // Áp dụng thay đổi vào License hiện có (CHANGE_LICENSE)
+        private async Task ApplyChangeLicense(List<RequestDetail> details)
+        {
+            var licenseIdStr = details.FirstOrDefault(d => d.FieldName == "license_id")?.NewValue;
+            if (!int.TryParse(licenseIdStr, out int licenseId))
+                throw new InvalidOperationException("license_id missing in CHANGE_LICENSE request.");
+
+            var license = await _context.Licenses.FindAsync(licenseId)
+                ?? throw new InvalidOperationException($"License {licenseId} not found.");
+
+            foreach (var d in details)
+            {
+                switch (d.FieldName)
+                {
+                    case "publisher_name":      license.PublisherName  = d.NewValue; break;
+                    case "software_type":       license.SoftwareType   = d.NewValue; break;
+                    case "license_type":        license.LicenseType    = d.NewValue; break;
+                    case "license_format":      license.LicenseFormat  = d.NewValue; break;
+                    case "counting_method":     license.CountingMethod = d.NewValue; break;
+                    case "academic_flag":       license.AcademicFlag   = bool.Parse(d.NewValue ?? "false"); break;
+                    case "description":         license.Description    = d.NewValue; break;
+                    case "expiry_date":
+                        license.ExpiryDate = d.NewValue != null ? DateTime.Parse(d.NewValue) : null;
+                        break;
+                    case "number_of_licenses":
+                        if (int.TryParse(d.NewValue, out int newCount))
+                        {
+                            int diff = newCount - license.NumberOfLicenses;
+                            license.NumberOfLicenses = newCount;
+                            license.NumberAvailable  = Math.Max(0, license.NumberAvailable + diff);
+                        }
+                        break;
+                    case "management_department_id":
+                        license.ManagementDepartmentId = int.TryParse(d.NewValue, out int deptId) ? deptId : null;
+                        break;
+                }
+            }
+
+            license.UpdatedAt = DateTime.UtcNow;
+        }
+
+        // Di chuyển License sang bộ phận khác và đổi người quản lý (MOVE_LICENSE)
+        // Theo SKILL_LICENSE_MANAGEMENT §3.3: cập nhật cả Department lẫn Person in charge
+        private async Task ApplyMoveLicense(List<RequestDetail> details)
+        {
+            var licenseIdStr = details.FirstOrDefault(d => d.FieldName == "license_id")?.NewValue;
+            if (!int.TryParse(licenseIdStr, out int licenseId))
+                throw new InvalidOperationException("license_id missing in MOVE_LICENSE request.");
+
+            var license = await _context.Licenses.FindAsync(licenseId)
+                ?? throw new InvalidOperationException($"License {licenseId} not found.");
+
+            // Cập nhật phòng ban đích (Deployment destination)
+            var destDeptDetail = details.FirstOrDefault(d => d.FieldName == "destination_department_id");
+            if (destDeptDetail != null && int.TryParse(destDeptDetail.NewValue, out int destDeptId))
+                license.ManagementDepartmentId = destDeptId;
+
+            // Cập nhật người quản lý mới (Person in charge of the location)
+            var newManagerDetail = details.FirstOrDefault(d => d.FieldName == "new_manager_user_id");
+            if (newManagerDetail != null && int.TryParse(newManagerDetail.NewValue, out int newManagerId))
+                license.ManagerUserId = newManagerId;
+
+            license.UpdatedAt = DateTime.UtcNow;
+        }
+
+        // Tách license con từ license cha (SPLIT_LICENSE)
+        private async Task ApplySplitLicense(Request request, List<RequestDetail> details)
+        {
+            var licenseIdStr = details.FirstOrDefault(d => d.FieldName == "license_id")?.NewValue;
+            if (!int.TryParse(licenseIdStr, out int licenseId))
+                throw new InvalidOperationException("license_id missing in SPLIT_LICENSE request.");
+
+            var license = await _context.Licenses.FindAsync(licenseId)
+                ?? throw new InvalidOperationException($"License {licenseId} not found.");
+
+            var splitCountStr = details.FirstOrDefault(d => d.FieldName == "split_count")?.NewValue;
+            if (!int.TryParse(splitCountStr, out int splitCount) || splitCount <= 0)
+                throw new InvalidOperationException("Invalid split_count.");
+
+            if (splitCount > license.NumberAvailable)
+                throw new InvalidOperationException($"Not enough available licenses. Available: {license.NumberAvailable}, Requested: {splitCount}");
+
+            var destDeptIdStr = details.FirstOrDefault(d => d.FieldName == "destination_department_id")?.NewValue;
+            int.TryParse(destDeptIdStr, out int destDeptId);
+
+            var lastNumber = await _context.Licenses
+                .Where(l => l.LicenseManagementNumber != null)
+                .OrderByDescending(l => l.LicenseId)
+                .Select(l => l.LicenseManagementNumber)
+                .FirstOrDefaultAsync();
+
+            var childNumber = GenerateLicenseManagementNumber(lastNumber);
+            var currentUser = request.UpdatedBy ?? "system";
+
+            license.NumberAvailable -= splitCount;
+            license.UpdatedAt        = DateTime.UtcNow;
+
+            var childLicense = new License
+            {
+                LicenseManagementNumber = childNumber,
+                ParentLicenseId         = license.LicenseId,
+                InstallationName        = license.InstallationName,
+                PublisherName           = license.PublisherName,
+                SoftwareType            = license.SoftwareType,
+                LicenseType             = license.LicenseType,
+                LicenseFormat           = license.LicenseFormat,
+                CountingMethod          = license.CountingMethod,
+                AcademicFlag            = license.AcademicFlag,
+                NumberOfLicenses        = splitCount,
+                NumberAvailable         = splitCount,
+                ManagementDepartmentId  = destDeptId > 0 ? destDeptId : license.ManagementDepartmentId,
+                LicenseStatus           = "Active",
+                ExpiryDate              = license.ExpiryDate,
+                IsDeleted               = false,
+                CreatedAt               = DateTime.UtcNow,
+                CreatedBy               = currentUser,
+                UpdatedAt               = DateTime.UtcNow,
+                UpdatedBy               = currentUser
+            };
+            _context.Licenses.Add(childLicense);
+            await _context.SaveChangesAsync();
+
+            _context.RequestDetails.Add(new RequestDetail
+            {
+                RequestId = request.RequestId,
+                FieldName = "child_license_id",
+                NewValue  = childLicense.LicenseId.ToString()
+            });
+        }
+
+        // Đánh dấu License đã hủy (DISPOSAL_LICENSE)
+        private async Task ApplyDisposalLicense(List<RequestDetail> details)
+        {
+            var licenseIdStr = details.FirstOrDefault(d => d.FieldName == "license_id")?.NewValue;
+            if (!int.TryParse(licenseIdStr, out int licenseId))
+                throw new InvalidOperationException("license_id missing in DISPOSAL_LICENSE request.");
+
+            var license = await _context.Licenses.FindAsync(licenseId)
+                ?? throw new InvalidOperationException($"License {licenseId} not found.");
+
+            bool isLinked = await _context.Softwares.AnyAsync(s => s.LicenseId == licenseId);
+            if (isLinked)
+                throw new InvalidOperationException("Cannot dispose: license is still linked to software or devices.");
+
+            var disposalDateStr = details.FirstOrDefault(d => d.FieldName == "disposal_date")?.NewValue;
+            license.LicenseStatus = "Disposed";
+            license.DisposalDate  = disposalDateStr != null ? DateTime.Parse(disposalDateStr) : DateTime.UtcNow;
+            license.UpdatedAt     = DateTime.UtcNow;
+        }
+
+        // ===============================
+        // Helper: sinh License Management Number
+        // ===============================
+        private static string GenerateLicenseManagementNumber(string? lastNumber)
+        {
+            if (string.IsNullOrEmpty(lastNumber))
+                return "LIC-00001";
+
+            var numPart = lastNumber.Replace("LIC-", "").TrimStart('0');
+            if (int.TryParse(numPart, out int current))
+                return $"LIC-{(current + 1):D5}";
+
+            return "LIC-00001";
+        }
+
+        // ===============================
+        // Helper: JSON deserialize helpers (dùng cho request_data)
+        // ===============================
+        private static string? GetString(Dictionary<string, System.Text.Json.JsonElement>? d, string key)
+            => d != null && d.TryGetValue(key, out var v) && v.ValueKind == System.Text.Json.JsonValueKind.String
+                ? v.GetString() : null;
+
+        private static int GetInt(Dictionary<string, System.Text.Json.JsonElement>? d, string key)
+            => d != null && d.TryGetValue(key, out var v) && v.ValueKind == System.Text.Json.JsonValueKind.Number
+                ? v.GetInt32() : 0;
+
+        private static bool GetBool(Dictionary<string, System.Text.Json.JsonElement>? d, string key)
+            => d != null && d.TryGetValue(key, out var v) && v.ValueKind == System.Text.Json.JsonValueKind.True;
+
+        private static int? GetNullableInt(Dictionary<string, System.Text.Json.JsonElement>? d, string key)
+            => d != null && d.TryGetValue(key, out var v) && v.ValueKind == System.Text.Json.JsonValueKind.Number
+                ? v.GetInt32() : null;
+
+        private static DateTime? GetNullableDate(Dictionary<string, System.Text.Json.JsonElement>? d, string key)
+        {
+            if (d != null && d.TryGetValue(key, out var v) && v.ValueKind == System.Text.Json.JsonValueKind.String)
+                if (DateTime.TryParse(v.GetString(), out var date))
+                    return date;
+            return null;
         }
         private void ApplyToAsset(ITAsset asset, List<RequestDetail> details)
         {
