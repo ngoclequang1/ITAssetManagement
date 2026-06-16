@@ -295,7 +295,7 @@ namespace ITAssetManagement.Controllers
                 Email = "copy_" + DateTime.Now.Ticks + "_" + user.Email,
                 ConsoleLoginId = user.ConsoleLoginId + "_copy",
                 SystemLoginId = user.SystemLoginId,
-                PasswordHash = user.PasswordHash, // Có thể yêu cầu user đổi pass sau
+                PasswordHash = user.PasswordHash, 
                 PrimaryDepartmentId = user.PrimaryDepartmentId,
                 RoleId = user.RoleId,
                 AuditorFlag = user.AuditorFlag,

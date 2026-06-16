@@ -320,15 +320,8 @@ namespace ITAssetManagement.Controllers
             }
         }
 
- // ===============================
+        // ===============================
         // APPLY NEW LICENSE
-        //
-        // FIX: License record đã được tạo sẵn với status "Pending" tại
-        // LicenseController.NewApplication(). Ở đây chỉ cần:
-        //   1. Tìm license theo license_id lưu trong RequestDetail
-        //   2. Chuyển LicenseStatus: "Pending" → "Active"
-        //   3. Cập nhật NumberAvailable = NumberOfLicenses (sẵn sàng phân bổ)
-        // Không tạo License mới, không sinh LicenseManagementNumber mới.
         // ===============================
         private async Task ApplyNewLicense(Request request, List<RequestDetail> details)
         {
