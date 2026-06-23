@@ -249,34 +249,42 @@ namespace ITAssetManagement.Controllers
                 .ToListAsync();
 
             // Kiểm tra đây có phải License request không
-            var appType = details.FirstOrDefault(d => d.FieldName == "application_type")?.NewValue;
-
-            if (appType != null && (appType.EndsWith("_LICENSE") || appType == "NEW_LICENSE"))
-            {
-                // 🔹 LICENSE REQUEST → xử lý riêng
-                await ApplyLicenseRequest(request, details, appType);
-            }
-            else
-            {
-                // 🔹 IT ASSET REQUEST — giữ nguyên logic cũ
-                if (request.AssetId != null)
+                var appType = details
+                    .FirstOrDefault(d => d.FieldName == "application_type")?.NewValue;
+            
+                // Kiểm tra xem có phải Asset request (ADD/DELETE) không
+                if (appType == "ADD_ASSET")
                 {
-                    var asset = await _context.ITAssets.FindAsync(request.AssetId);
-                    ApplyToAsset(asset, details);
+                    await ApplyAddAsset(request, details);
+                }
+                else if (appType == "DELETE_ASSET")
+                {
+                    await ApplyDeleteAsset(details);
+                }
+                else if (appType != null && (appType.EndsWith("_LICENSE") || appType == "NEW_LICENSE"))
+                {
+                    await ApplyLicenseRequest(request, details, appType!);
                 }
                 else
                 {
-                    var requestAssets = await _context.Set<RequestAsset>()
-                        .Where(x => x.RequestId == requestId)
-                        .ToListAsync();
-
-                    foreach (var ra in requestAssets)
+                    // IT ASSET CHANGE/MOVE (cũ) – giữ nguyên logic
+                    if (request.AssetId != null)
                     {
-                        var asset = await _context.ITAssets.FindAsync(ra.AssetId);
+                        var asset = await _context.ITAssets.FindAsync(request.AssetId);
                         ApplyToAsset(asset, details);
                     }
+                    else
+                    {
+                        var requestAssets = await _context.Set<RequestAsset>()
+                            .Where(x => x.RequestId == requestId).ToListAsync();
+                        foreach (var ra in requestAssets)
+                        {
+                            var asset = await _context.ITAssets.FindAsync(ra.AssetId);
+                            ApplyToAsset(asset, details);
+                        }
+                    }
                 }
-            }
+
 
             request.StatusId = 2; // Approved
 
@@ -294,6 +302,59 @@ namespace ITAssetManagement.Controllers
             await _context.SaveChangesAsync();
         }
 
+  // Tạo ITAsset mới từ RequestDetail (ADD_ASSET)
+    private async Task ApplyAddAsset(Request request, List<RequestDetail> details)
+    {
+        string? Get(string field) =>
+            details.FirstOrDefault(d => d.FieldName == field)?.NewValue;
+ 
+        int ParseInt(string? v, int def = 0) =>
+            int.TryParse(v, out var n) ? n : def;
+ 
+        var asset = new ITAsset
+        {
+            AssetControlNumber = Get("asset_control_number") ?? string.Empty,
+            AssetName          = Get("asset_name")           ?? string.Empty,
+            Manufacturer       = Get("manufacturer"),
+            Model              = Get("model"),
+            SerialNumber       = Get("serial_number"),
+            CategoryId         = ParseInt(Get("category_id"), 1),
+            StatusId           = ParseInt(Get("status_id"),   2), // Available
+            LocationId         = ParseInt(Get("location_id"), 1),
+            DepartmentId       = ParseInt(Get("department_id")),
+            UserCreatedId      = request.UserCreatedId,
+            CreatedAt          = DateTime.UtcNow
+        };
+ 
+        _context.ITAssets.Add(asset);
+        await _context.SaveChangesAsync();
+ 
+        // Ghi lại asset_id vào RequestDetail để tra cứu sau
+        _context.RequestDetails.Add(new RequestDetail
+        {
+            RequestId = request.RequestId,
+            FieldName = "created_asset_id",
+            NewValue  = asset.AssetId.ToString()
+        });
+    }
+ 
+    // Soft-delete ITAsset (DELETE_ASSET)
+    private async Task ApplyDeleteAsset(List<RequestDetail> details)
+    {
+        var assetIdStr = details.FirstOrDefault(d => d.FieldName == "asset_id")?.NewValue;
+        if (!int.TryParse(assetIdStr, out int assetId))
+            throw new InvalidOperationException("asset_id missing in DELETE_ASSET request.");
+ 
+        var asset = await _context.ITAssets.FindAsync(assetId)
+            ?? throw new InvalidOperationException($"Asset {assetId} not found.");
+ 
+        // Soft delete – đặt status sang Deleted (status_id = 5 theo CLAUDE.md)
+        asset.StatusId = 5; // Deleted
+        asset.UpdatedAt = DateTime.UtcNow;
+ 
+        // Nếu bảng có cột is_deleted thì set thêm
+        // asset.IsDeleted = true;
+    }
         // ===============================
         // 4a. APPLY LICENSE REQUEST
         // Dispatch theo application_type

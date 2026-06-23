@@ -35,6 +35,7 @@ namespace ITAssetManagement.Data
 
         public DbSet<License> Licenses { get; set; }
         public DbSet<LicenseInventoryHistory> LicenseInventoryHistories { get; set; }
+        public DbSet<UserPermission> UserPermissions { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -45,6 +46,14 @@ namespace ITAssetManagement.Data
             modelBuilder.Entity<ITAsset>().ToTable("IT_ASSET");
             modelBuilder.Entity<License>().ToTable("LICENSE");
             modelBuilder.Entity<LicenseInventoryHistory>().ToTable("LICENSE_INVENTORY_HISTORY");
+            modelBuilder.Entity<UserPermission>().ToTable("USER_PERMISSION").HasKey(p => p.UserId);
+
+            // UserPermission → User (1-1)
+            modelBuilder.Entity<UserPermission>()
+                .HasOne(p => p.User)
+                .WithOne()
+                .HasForeignKey<UserPermission>(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             // User → Department
             modelBuilder.Entity<User>()

@@ -794,7 +794,7 @@ namespace ITAssetManagement.Controllers
 
                 var req = new Request
                 {
-                    RequestTypeId      = 11, // SPLIT
+                    RequestTypeId      = 11,
                     UserCreatedId      = currentUserId > 0 ? currentUserId : dto.FirstApproverId,
                     TargetDiv          = null,
                     StatusId           = 1,
