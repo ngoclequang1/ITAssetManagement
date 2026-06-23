@@ -3,7 +3,7 @@
     public class SoftwareGroupingDto
     {
         public List<int> SoftwareIds { get; set; }
-        public int? GroupId { get; set; }  // Thêm dòng này
+        public int? GroupId { get; set; } 
     }
 
     // =============================================
