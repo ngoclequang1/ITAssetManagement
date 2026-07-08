@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+    <link rel="stylesheet" href="/css/Auth/register.css">
+</head>
+<body>
+
+<div class="register-container">
+    <div class="register-card">
+
+        <div class="register-header">
+            <h2>Create Account</h2>
+            <p>Register to continue</p>
+        </div>
+
+        <form id="registerForm">
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="text" id="username" required placeholder=" " />
+                    <label>Username</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="email" id="email" required placeholder=" " />
+                    <label>Email</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <input type="password" id="password" required placeholder=" " />
+                    <label>Password</label>
+                </div>
+            </div>
+
+            <button type="submit" class="register-btn">
+                Register
+            </button>
+        </form>
+
+        <div class="login-link">
+            Already have an account? <a href="login.html">Login</a>
+        </div>
+
+    </div>
+</div>
+
+<div id="successModal" class="modal">
+    <div class="modal-content">
+        <div class="success-icon">✓</div>
+        <h3>Registration Successful!</h3>
+        <p>Redirecting to login page...</p>
+    </div>
+</div>
+<script src="/js/Auth/register.js"></script>
+</body>
+</html>
+

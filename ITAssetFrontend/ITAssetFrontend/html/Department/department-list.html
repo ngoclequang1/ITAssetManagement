@@ -1,0 +1,315 @@
+<link rel="stylesheet" href="../../css/department-list.css">
+
+<div class="dept-layout">
+
+    <!-- ===================== SIDEBAR LỌC ===================== -->
+    <div class="dept-sidebar">
+        <div class="search-header">Current search criteria</div>
+
+        <div class="search-actions">
+            <button class="btn-outline" onclick="searchDepartments()">Search</button>
+            <button class="btn-outline" onclick="clearDeptSearch()">Clear</button>
+            <button class="btn-outline" onclick="resetDeptSearch()">Reset</button>
+            <button class="btn-outline">Expand fully</button>
+        </div>
+
+        <div class="filter-group">
+            <label>Department Code / Name</label>
+            <input type="text" id="filterDeptKeyword" class="form-control" placeholder="e.g. IT or Finance">
+        </div>
+
+        <div class="filter-group">
+            <label style="display:flex; align-items:center; gap:8px;">
+                <input type="checkbox" id="filterDeptObsolete"> Include Obsolete Departments
+            </label>
+        </div>
+
+        <div class="filter-actions">
+            <button class="btn-danger" onclick="searchDepartments()">Search</button>
+            <button class="btn-secondary" onclick="clearDeptSearch()">Clear</button>
+        </div>
+    </div>
+
+    <!-- ===================== MAIN CONTENT ===================== -->
+    <div class="dept-main">
+
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <button class="btn-outline"
+                    style="background-color:#4a86e8; color:white; border:none; font-weight:bold; margin-right:10px;"
+                    onclick="openCreateDeptModal()">+ Add New Department</button>
+                <span class="showing-text">
+                    Showing <b id="deptShowStartTop">0</b> – <b id="deptShowEndTop">0</b>
+                    of <b class="text-red" id="deptTotalTop">0</b> results
+                </span>
+            </div>
+            <div class="toolbar-right">
+                <div id="deptPaginationTop" class="pagination-mini"></div>
+            </div>
+        </div>
+
+        <!-- LIST -->
+        <div id="deptListContainer"></div>
+
+        <!-- TOOLBAR BOTTOM -->
+        <div class="toolbar" style="margin-top:15px;">
+            <div class="toolbar-left">
+                <span class="showing-text">
+                    Showing <b id="deptShowStartBottom">0</b> – <b id="deptShowEndBottom">0</b>
+                    of <b class="text-red" id="deptTotalBottom">0</b> results
+                </span>
+            </div>
+            <div class="toolbar-right">
+                <div id="deptPaginationBottom" class="pagination-mini"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: DEPARTMENT DETAIL (Description)
+     Hiển thị thông tin dept + bảng thành viên
+============================================================ -->
+<div id="deptDetailModal" class="modal">
+    <div class="modal-content" style="width: 860px;">
+        <div class="modal-header">
+            <h3>Department Details</h3>
+            <span class="close" onclick="closeDeptModal('deptDetailModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px; max-height: 75vh; overflow-y: auto;">
+
+            <!-- Info grid -->
+            <table style="width:100%; border-collapse:collapse; margin-bottom:24px;" id="deptDetailBody">
+                <tr><td style="text-align:center; padding:20px;">Loading...</td></tr>
+            </table>
+
+            <!-- Members section -->
+            <div style="margin-top: 8px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                    <h4 style="margin:0; color:#000066; border-bottom:2px solid #000066;
+                               padding-bottom:6px; font-size:14px;">
+                        Members
+                    </h4>
+                    <button onclick="openAssignUserFromDetail()"
+                            style="background:#4a86e8; color:white; border:none; padding:5px 12px;
+                                   cursor:pointer; font-size:12px; font-weight:bold; border-radius:2px;">
+                        + Assign User
+                    </button>
+                </div>
+
+                <table style="width:100%; border-collapse:collapse; font-size:12px;">
+                    <thead>
+                        <tr style="background:#000066; color:white;">
+                            <th style="padding:8px 10px; text-align:left; font-weight:normal;">User Code</th>
+                            <th style="padding:8px 10px; text-align:left; font-weight:normal;">Username</th>
+                            <th style="padding:8px 10px; text-align:left; font-weight:normal;">Email</th>
+                            <th style="padding:8px 10px; text-align:left; font-weight:normal;">Permission</th>
+                            <th style="padding:8px 10px; text-align:center; font-weight:normal;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="deptMembersBody">
+                        <tr><td colspan="5" style="text-align:center; padding:20px;">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeDeptModal('deptDetailModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: ASSIGN USER TO DEPARTMENT
+============================================================ -->
+<div id="deptAssignUserModal" class="modal">
+    <div class="modal-content" style="width: 520px;">
+        <div class="modal-header">
+            <h3>Assign User to Department</h3>
+            <span class="close" onclick="closeDeptModal('deptAssignUserModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="assignDeptId">
+
+            <div style="background:#f4f6f9; border:1px solid #ddd; padding:10px 15px; margin-bottom:18px; border-radius:2px;">
+                <div style="font-size:11px; color:#777; margin-bottom:3px;">Department</div>
+                <div id="assignDeptNameLabel" style="font-weight:bold; color:#000066; font-size:14px;">-</div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label style="display:block; font-weight:bold; font-size:12px; margin-bottom:4px;">
+                    Select User <span style="background:red; color:white; font-size:10px; padding:1px 4px; border-radius:2px;">Must</span>
+                </label>
+                <select id="assignUserId" class="form-control">
+                    <option value="">-- Select User --</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" id="assignIsPrimaryAdmin">
+                    Mark as Primary Admin of this department
+                </label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeDeptModal('deptAssignUserModal')">Cancel</button>
+            <button class="btn-save" onclick="submitAssignUser()">Assign</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: EDIT DEPARTMENT
+============================================================ -->
+<div id="deptEditModal" class="modal">
+    <div class="modal-content" style="width: 440px;">
+        <div class="modal-header">
+            <h3>Edit Department</h3>
+            <span class="close" onclick="closeDeptModal('deptEditModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="editDeptId">
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label style="display:block; font-size:12px; color:#777; margin-bottom:3px;">Department Code (Read-only)</label>
+                <div id="editDeptCodeLabel"
+                     style="font-weight:bold; color:#000066; padding:6px; background:#f4f6f9;
+                            border:1px solid #ddd; font-size:14px;">-</div>
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label style="display:block; font-weight:bold; font-size:12px; margin-bottom:4px;">
+                    Department Name <span style="background:red; color:white; font-size:10px; padding:1px 4px; border-radius:2px;">Must</span>
+                </label>
+                <input type="text" id="editDeptName" class="form-control">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeDeptModal('deptEditModal')">Cancel</button>
+            <button class="btn-save" onclick="submitEditDept()">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: CREATE NEW DEPARTMENT
+============================================================ -->
+<div id="deptCreateModal" class="modal">
+    <div class="modal-content" style="width: 480px;">
+        <div class="modal-header">
+            <h3>Add New Department</h3>
+            <span class="close" onclick="closeDeptModal('deptCreateModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label style="display:block; font-weight:bold; font-size:12px; margin-bottom:4px;">
+                    Department Code <span style="background:red; color:white; font-size:10px; padding:1px 4px; border-radius:2px;">Must</span>
+                </label>
+                <input type="text" id="createDeptCode" class="form-control" placeholder="e.g. FIN, HR, IT-001">
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label style="display:block; font-weight:bold; font-size:12px; margin-bottom:4px;">
+                    Department Name <span style="background:red; color:white; font-size:10px; padding:1px 4px; border-radius:2px;">Must</span>
+                </label>
+                <input type="text" id="createDeptName" class="form-control" placeholder="e.g. Finance Department">
+            </div>
+
+            <div class="form-group" style="margin-bottom:14px;">
+                <label style="display:block; font-weight:bold; font-size:12px; margin-bottom:4px;">
+                    Parent Department
+                </label>
+                <select id="createDeptParent" class="form-control">
+                    <option value="">-- None (Root Department) --</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom:4px;">
+                <label style="display:flex; align-items:center; gap:8px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" id="createDeptKitting">
+                    Is Kitting Department
+                </label>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeDeptModal('deptCreateModal')">Cancel</button>
+            <button class="btn-save" onclick="submitCreateDept()">Create Department</button>
+        </div>
+    </div>
+</div>
+
+
+<script>
+// ─────────────────────────────────────────────────────────────
+// Nút "Assign User" bên trong Detail modal
+// ─────────────────────────────────────────────────────────────
+window.openAssignUserFromDetail = function() {
+    const modal  = document.getElementById("deptDetailModal");
+    const deptId = parseInt(modal?.dataset.deptId || "0");
+    if (!deptId) return;
+
+    const dept   = deptData.find(d => d.departmentId === deptId);
+    openAssignUserModal(deptId, dept?.departmentName || "Department");
+};
+
+// ─────────────────────────────────────────────────────────────
+// Create Department
+// ─────────────────────────────────────────────────────────────
+window.openCreateDeptModal = async function() {
+    document.getElementById("createDeptCode").value    = "";
+    document.getElementById("createDeptName").value    = "";
+    document.getElementById("createDeptKitting").checked = false;
+
+    // Load parent options
+    try {
+        const res    = await fetchAPI("/departments?Page=1&PageSize=500");
+        const depts  = res.data || [];
+        let html     = '<option value="">-- None (Root Department) --</option>';
+        depts.forEach(d => {
+            html += `<option value="${d.departmentId}">${d.departmentCode} – ${d.departmentName}</option>`;
+        });
+        document.getElementById("createDeptParent").innerHTML = html;
+    } catch(e) {
+        document.getElementById("createDeptParent").innerHTML =
+            '<option value="">Error loading departments</option>';
+    }
+
+    document.getElementById("deptCreateModal").style.display = "block";
+};
+
+window.submitCreateDept = async function() {
+    const code     = document.getElementById("createDeptCode").value.trim();
+    const name     = document.getElementById("createDeptName").value.trim();
+    const parentId = document.getElementById("createDeptParent").value;
+    const kitting  = document.getElementById("createDeptKitting").checked;
+
+    if (!code || !name) {
+        showDeptAlert("Department Code and Name are required.", "Validation", true);
+        return;
+    }
+
+    try {
+        await fetchAPI("/departments", {
+            method: "POST",
+            body: JSON.stringify({
+                DepartmentCode:      code,
+                DepartmentName:      name,
+                ParentDepartmentId:  parentId ? parseInt(parentId) : null,
+                IsKittingDepartment: kitting
+            })
+        });
+        showDeptAlert("Department created successfully!", "Success");
+        closeDeptModal("deptCreateModal");
+        loadDepartmentData();
+    } catch(e) {
+        showDeptAlert("Error: " + e.message, "Error", true);
+    }
+};
+</script>

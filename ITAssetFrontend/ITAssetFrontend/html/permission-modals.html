@@ -1,0 +1,256 @@
+<!-- ============================================================
+     PERMISSION MODALS – Chèn vào cuối hardware-management.html
+     (trước thẻ đóng của div container ngoài cùng)
+============================================================ -->
+
+
+<!-- ============================================================
+     MODAL: DELETE ASSET REQUEST (Manager gửi, Administrator approve)
+============================================================ -->
+<div id="deleteAssetRequestModal" class="modal">
+    <div class="modal-content" style="width: 560px; border-radius: 0;">
+        <div class="modal-header" style="background: #b71c1c; color: white;">
+            <h3>Delete Asset Request <span style="font-size:11px; font-weight:normal; margin-left:8px;">削除申請</span></h3>
+            <span class="close" onclick="closeModal('deleteAssetRequestModal')" style="color:white;">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="deleteReqAssetId">
+
+            <!-- Asset info (read-only) -->
+            <div style="background: #fff3f3; border: 1px solid #ef9a9a; border-left: 4px solid #b71c1c;
+                        padding: 12px 15px; margin-bottom: 18px; border-radius: 2px;">
+                <div style="font-size: 12px; color: #777; margin-bottom: 4px;">Asset to be deleted</div>
+                <div style="font-weight: bold; font-size: 14px; color: #b71c1c;" id="deleteReqAssetName">-</div>
+                <div style="font-size: 12px; color: #555; margin-top: 3px;" id="deleteReqControlNo">-</div>
+                <div style="margin-top: 8px; font-size: 12px;">
+                    Expected Status After Deletion:
+                    <span style="background: #263238; color: white; padding: 2px 8px; border-radius: 3px;
+                                 font-size: 11px; font-weight: bold; margin-left: 6px;">Deleted</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="font-weight: bold; font-size: 12px;">
+                    Reason for Deletion <span class="badge-must">Must</span>
+                </label>
+                <textarea id="deleteReqReason" class="form-control" rows="3"
+                          style="padding: 8px; border: 1px solid #ef9a9a;"
+                          placeholder="Please provide a reason for deleting this asset..."></textarea>
+            </div>
+
+            <!-- Approval section -->
+            <div class="approval-section" style="background: #fce4ec; border-color: #f48fb1;">
+                <div style="font-size: 13px; font-weight: bold; color: #b71c1c;
+                            border-bottom: 1px solid #f48fb1; padding-bottom: 5px; margin-bottom: 10px;">
+                    Approval Route
+                </div>
+                <div class="approval-row">
+                    <div class="approval-col">
+                        <label>
+                            <input type="checkbox" id="deleteReqSecAppFlag" checked
+                                   onchange="toggleDeleteSecApp()">
+                            Secondary Approval Flag (On)
+                        </label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">
+                            First Approver <span class="badge-must">Must</span>
+                        </label>
+                        <select id="deleteReqFirstApp" class="form-control">
+                            <option value="">-- Select Approver (Administrator) --</option>
+                        </select>
+                    </div>
+                    <div class="approval-col">
+                        <label style="visibility: hidden;">placeholder</label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">
+                            Secondary Approver
+                            <span class="badge-must" id="deleteReqSecAppBadge">Must</span>
+                        </label>
+                        <select id="deleteReqSecApp" class="form-control">
+                            <option value="">-- Select Approver --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="text-align: right; padding: 15px; border-top: 1px solid #eee;">
+            <button class="btn-cancel" onclick="closeModal('deleteAssetRequestModal')"
+                    style="padding: 8px 16px; background: #ccc; border: none; cursor: pointer;
+                           color: black; margin-right: 10px; font-weight: bold;">
+                Cancel
+            </button>
+            <button onclick="submitDeleteAssetRequest()"
+                    style="padding: 8px 16px; background: #b71c1c; color: white;
+                           border: none; cursor: pointer; font-weight: bold;">
+                Submit Delete Request
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     PATCH: Thêm Approval Section vào Add Hardware Modal
+     (Chèn bên trong modal-body của addHardwareModal, sau grid)
+     Chỉ hiển thị khi user là Manager (canRequest = true)
+============================================================ -->
+<template id="addHwApprovalSection">
+    <div class="approval-section" style="margin-top: 15px; border: 1px solid #c9d6e8;
+                                          background: #eaf1fa; padding: 12px 15px;">
+        <div style="font-size: 13px; font-weight: bold; color: #000066;
+                    border-bottom: 1px solid #c9d6e8; padding-bottom: 5px; margin-bottom: 10px;">
+            Approval Route
+            <span style="font-size: 11px; font-weight: normal; color: #555; margin-left: 8px;">
+                (Required – request will be reviewed by Administrator)
+            </span>
+        </div>
+        <div class="approval-row">
+            <div class="approval-col">
+                <label><input type="checkbox" id="addHwSecAppFlag" checked
+                               onchange="toggleAddHwSecApp()"> Secondary Approval Flag (On)</label>
+                <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">
+                    First Approver <span class="badge-must">Must</span>
+                </label>
+                <select id="addHwFirstApp" class="form-control">
+                    <option value="">-- Select Administrator --</option>
+                </select>
+            </div>
+            <div class="approval-col">
+                <label style="visibility: hidden;">placeholder</label>
+                <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">
+                    Secondary Approver
+                    <span class="badge-must" id="addHwSecAppBadge">Must</span>
+                </label>
+                <select id="addHwSecApp" class="form-control">
+                    <option value="">-- Select Approver --</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</template>
+
+
+<!-- ============================================================
+     PERMISSION INFO BANNER
+     Hiển thị ở đầu trang để user biết role của mình
+============================================================ -->
+<div id="permissionBanner" style="display:none; padding: 8px 15px; margin-bottom: 10px;
+     border-radius: 3px; font-size: 12px; font-weight: bold;">
+</div>
+
+<script>
+// Toggle secondary approver trong Delete modal
+window.toggleDeleteSecApp = function() {
+    const flag   = document.getElementById("deleteReqSecAppFlag");
+    const select = document.getElementById("deleteReqSecApp");
+    const badge  = document.getElementById("deleteReqSecAppBadge");
+    if (!flag || !select || !badge) return;
+    if (flag.checked) {
+        select.disabled = false;
+        badge.style.display = "inline-block";
+    } else {
+        select.disabled = true;
+        select.value    = "";
+        badge.style.display = "none";
+    }
+};
+
+// Toggle secondary approver trong Add modal
+window.toggleAddHwSecApp = function() {
+    const flag   = document.getElementById("addHwSecAppFlag");
+    const select = document.getElementById("addHwSecApp");
+    const badge  = document.getElementById("addHwSecAppBadge");
+    if (!flag || !select || !badge) return;
+    if (flag.checked) {
+        select.disabled = false;
+        badge.style.display = "inline-block";
+    } else {
+        select.disabled = true;
+        select.value    = "";
+        badge.style.display = "none";
+    }
+};
+
+// Điền danh sách approver (Administrator role) vào delete modal
+async function loadApproversForDeleteModal() {
+    try {
+        const res   = await fetchAPI("/users?Page=1&PageSize=500");
+        const users = res.data || res || [];
+
+        // Lọc chỉ lấy user có can_approve = true (role Administrator hoặc ADMIN)
+        const approvers = users.filter(u => [1, 4].includes(u.roleId || u.role_id));
+
+        let html = '<option value="">-- Select Administrator --</option>';
+        // Nếu không lọc được (do response không có roleId), dùng tất cả
+        const list = approvers.length > 0 ? approvers : users;
+        list.forEach(u => {
+            html += `<option value="${u.userId}">${u.username} (${u.email || u.userCode || ""})</option>`;
+        });
+
+        ["deleteReqFirstApp", "deleteReqSecApp", "addHwFirstApp", "addHwSecApp"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = html;
+        });
+    } catch(e) {
+        console.warn("Could not load approvers:", e.message);
+    }
+}
+
+// Hiển thị permission banner
+function showPermissionBanner() {
+    const banner = document.getElementById("permissionBanner");
+    if (!banner) return;
+
+    const perm = window.currentPermission || { canRequest: false, canApprove: false };
+
+    if (perm.canApprove) {
+        banner.style.display = "block";
+        banner.style.background = "#e8f5e9";
+        banner.style.color      = "#1b5e20";
+        banner.style.border     = "1px solid #a5d6a7";
+        banner.innerHTML = "✓ You have <b>Administrator</b> role – you can approve/reject pending asset requests.";
+    } else if (perm.canRequest) {
+        banner.style.display = "block";
+        banner.style.background = "#e3f2fd";
+        banner.style.color      = "#0d47a1";
+        banner.style.border     = "1px solid #90caf9";
+        banner.innerHTML = "✓ You have <b>Manager</b> role – you can submit add/edit/delete requests for approval.";
+    } else {
+        banner.style.display = "block";
+        banner.style.background = "#f5f5f5";
+        banner.style.color      = "#757575";
+        banner.style.border     = "1px solid #e0e0e0";
+        banner.innerHTML = "ℹ You have <b>General Staff</b> role – view-only access. Contact your Manager to request changes.";
+    }
+}
+
+// Inject approval section vào Add Hardware modal khi user là Manager
+function injectApprovalSectionToAddModal() {
+    const perm = window.currentPermission || {};
+    if (!perm.canRequest) return;
+
+    const template  = document.getElementById("addHwApprovalSection");
+    const modalBody = document.querySelector("#addHardwareModal .modal-body");
+    if (!template || !modalBody) return;
+
+    // Thêm approval section nếu chưa có
+    if (!document.getElementById("addHwFirstApp")) {
+        const clone = template.content.cloneNode(true);
+        modalBody.appendChild(clone);
+    }
+
+    // Đổi nút "Save Hardware" → "Submit for Approval"
+    const saveBtn = document.querySelector("#addHardwareModal .btn-save");
+    if (saveBtn) {
+        saveBtn.innerText = "Submit for Approval";
+        saveBtn.onclick   = window.submitAddHardwareAsRequest;
+    }
+}
+
+// Chạy sau khi loadCurrentUserPermission() xong
+const _origApplyPerm = window.applyPermissionToUI || function(){};
+window.applyPermissionToUI = function() {
+    _origApplyPerm();
+    showPermissionBanner();
+    loadApproversForDeleteModal();
+    injectApprovalSectionToAddModal();
+};
+</script>

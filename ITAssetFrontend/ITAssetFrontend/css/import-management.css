@@ -1,0 +1,510 @@
+/* =========================================================
+   LAYOUT CHÍNH (2 CỘT)
+========================================================= */
+.import-layout {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #333;
+}
+
+/* =========================================================
+   SIDEBAR
+========================================================= */
+.import-sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    height: fit-content;
+}
+
+.search-header {
+    background: #000066;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    font-size: 14px;
+}
+
+/* Tab navigation bên sidebar */
+.tab-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 16px;
+}
+
+.tab-btn {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+    font-size: 13px;
+    color: #444;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 2px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.tab-btn:hover {
+    background: #e6f0ff;
+    color: #000066;
+    border-color: #000066;
+}
+
+.tab-btn.active {
+    background: #000066;
+    color: white;
+    border-color: #000066;
+    font-weight: bold;
+}
+
+.tab-icon { font-size: 15px; }
+
+/* Info box trong sidebar */
+.sidebar-info {
+    background: #f0f4f8;
+    border: 1px solid #ccc;
+    padding: 12px;
+}
+
+.info-title {
+    font-weight: bold;
+    font-size: 12px;
+    color: #000066;
+    margin-bottom: 8px;
+}
+
+.info-list {
+    padding-left: 16px;
+    margin: 0;
+    color: #555;
+    font-size: 12px;
+    line-height: 1.8;
+}
+
+.btn-template {
+    display: block;
+    width: 100%;
+    margin-top: 7px;
+    padding: 7px 10px;
+    background: white;
+    border: 1px solid #4a86e8;
+    color: #4a86e8;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: bold;
+    text-align: left;
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+
+.btn-template:hover {
+    background: #e6f0ff;
+}
+
+/* =========================================================
+   MAIN CONTENT
+========================================================= */
+.import-main {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+/* Panel ẩn mặc định, chỉ hiện khi .active */
+.import-panel { display: none; }
+.import-panel.active { display: block; }
+
+/* Header của từng panel */
+.panel-header {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+}
+
+.panel-title {
+    margin: 0 0 5px 0;
+    font-size: 17px;
+    color: #000066;
+}
+
+.panel-subtitle {
+    font-size: 12px;
+    font-weight: normal;
+    color: #888;
+    margin-left: 8px;
+}
+
+.panel-desc {
+    margin: 0;
+    color: #666;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+/* =========================================================
+   UPLOAD ZONE (DRAG & DROP)
+========================================================= */
+.upload-zone {
+    background: white;
+    border: 2px dashed #b0c4de;
+    padding: 40px 20px;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 16px;
+    transition: border-color 0.2s, background 0.2s;
+    border-radius: 2px;
+}
+
+.upload-zone:hover,
+.upload-zone.dragover {
+    border-color: #000066;
+    background: #f0f5ff;
+}
+
+.upload-icon { font-size: 36px; margin-bottom: 8px; }
+.upload-label { font-size: 15px; font-weight: bold; color: #333; }
+.upload-sub { font-size: 12px; color: #888; margin: 6px 0; }
+.upload-hint { font-size: 11px; color: #aaa; margin-top: 8px; }
+
+.btn-browse {
+    display: inline-block;
+    padding: 7px 20px;
+    background: #000066;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+
+.btn-browse:hover { background: #000044; }
+
+/* =========================================================
+   FILE PREVIEW (sau khi chọn file)
+========================================================= */
+.file-preview {
+    background: #f0f6ff;
+    border: 1px solid #b3cef5;
+    padding: 12px 15px;
+    margin-bottom: 16px;
+    border-radius: 2px;
+}
+
+.preview-file {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.preview-icon { font-size: 28px; flex-shrink: 0; }
+
+.preview-info { flex-grow: 1; }
+
+.preview-name {
+    font-weight: bold;
+    font-size: 13px;
+    color: #000066;
+    word-break: break-all;
+}
+
+.preview-meta {
+    font-size: 11px;
+    color: #777;
+    margin-top: 3px;
+}
+
+.btn-remove {
+    background: none;
+    border: 1px solid #d32f2f;
+    color: #d32f2f;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 2px;
+    flex-shrink: 0;
+    transition: background 0.15s;
+}
+
+.btn-remove:hover { background: #ffebee; }
+
+/* =========================================================
+   REQUIRED COLUMNS INFO
+========================================================= */
+.required-columns {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+}
+
+.req-title {
+    font-weight: bold;
+    font-size: 12px;
+    color: #000066;
+    margin-bottom: 10px;
+}
+
+.req-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+.req-col {
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.req-col.must {
+    background: #fff0f0;
+    border: 1px solid #ffcdd2;
+    color: #c62828;
+}
+
+.req-col.optional {
+    background: #f0f4f8;
+    border: 1px solid #cfd8dc;
+    color: #546e7a;
+}
+
+/* =========================================================
+   IMPORT ACTIONS (nút bấm submit)
+========================================================= */
+.import-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.btn-import {
+    padding: 10px 28px;
+    background: #000066;
+    color: white;
+    border: none;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.15s, opacity 0.15s;
+}
+
+.btn-import:hover:not(:disabled) { background: #000044; }
+
+.btn-import:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.btn-template-inline {
+    padding: 9px 18px;
+    background: white;
+    border: 1px solid #4a86e8;
+    color: #4a86e8;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+
+.btn-template-inline:hover { background: #e6f0ff; }
+
+/* =========================================================
+   IMPORT RESULT (sau khi import)
+========================================================= */
+.import-result {
+    border: 1px solid #ddd;
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+/* Result header */
+.result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.result-header.success {
+    background: #e8f5e9;
+    border-bottom: 1px solid #c8e6c9;
+    color: #1b5e20;
+}
+
+.result-header.error {
+    background: #ffebee;
+    border-bottom: 1px solid #ffcdd2;
+    color: #b71c1c;
+}
+
+/* Stats bar */
+.result-stats {
+    display: flex;
+    gap: 0;
+    background: white;
+    border-bottom: 1px solid #eee;
+}
+
+.stat-item {
+    flex: 1;
+    padding: 14px 16px;
+    border-right: 1px solid #eee;
+    text-align: center;
+}
+
+.stat-item:last-child { border-right: none; }
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+    line-height: 1.2;
+}
+
+.stat-number.success { color: #2e7d32; }
+.stat-number.error   { color: #c62828; }
+.stat-number.total   { color: #000066; }
+
+.stat-label {
+    font-size: 11px;
+    color: #888;
+    margin-top: 3px;
+}
+
+/* Action buttons bên trong result */
+.result-actions {
+    padding: 14px 16px;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-download-err {
+    padding: 8px 18px;
+    background: #d32f2f;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+
+.btn-download-err:hover { background: #b71c1c; }
+
+.btn-import-again {
+    padding: 8px 18px;
+    background: white;
+    border: 1px solid #000066;
+    color: #000066;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+
+.btn-import-again:hover { background: #e6f0ff; }
+
+.result-msg {
+    font-size: 13px;
+    color: #555;
+}
+
+/* =========================================================
+   BADGE MUST
+========================================================= */
+.badge-must {
+    background: #d32f2f;
+    color: white;
+    font-size: 10px;
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-weight: bold;
+    margin-left: 4px;
+    vertical-align: middle;
+}
+
+/* =========================================================
+   MODAL
+========================================================= */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 8% auto;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.modal-header {
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 { margin: 0; font-size: 15px; color: white; }
+
+.close {
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close:hover { color: #ffcccc; }
+
+.modal-body { padding: 20px; }
+
+.modal-footer {
+    padding: 12px 15px;
+    border-top: 1px solid #eee;
+    background: #f9f9f9;
+}
+
+/* =========================================================
+   SPINNER (loading animation)
+========================================================= */
+.spinner {
+    width: 44px;
+    height: 44px;
+    border: 4px solid #e0e0e0;
+    border-top-color: #000066;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

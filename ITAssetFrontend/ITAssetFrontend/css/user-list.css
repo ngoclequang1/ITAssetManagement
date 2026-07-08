@@ -1,0 +1,326 @@
+.user-layout {
+    display: flex;
+    gap: 20px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #333;
+    padding: 15px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* === SIDEBAR LỌC === */
+.user-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: #f0f4f8;
+    padding: 15px;
+    border: 1px solid #ccc;
+    height: fit-content;
+}
+
+.search-header {
+    background: #000066;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.search-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.tree-view {
+    background: white;
+    height: 120px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 15px;
+    overflow-y: auto;
+    font-size: 12px;
+}
+
+.filter-group { margin-bottom: 10px; }
+.filter-group > label { display: block; background: #dbeafc; padding: 5px; border-bottom: 1px solid #ccc; font-weight: normal; margin-bottom: 5px; font-size: 12px;}
+.form-control { width: 100%; padding: 4px; border: 1px solid #ccc; box-sizing: border-box; }
+.checkbox-container { background: white; padding: 8px; border: 1px solid #ccc; font-size: 12px;}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-danger { background: #d32f2f; color: white; border: none; padding: 8px; cursor: pointer; flex: 1; font-weight: bold; }
+.btn-secondary { background: #457b9d; color: white; border: none; padding: 8px; cursor: pointer; flex: 1; font-weight: bold; }
+.btn-outline { border: 1px solid #999; background: #fff; padding: 4px; cursor: pointer; font-size: 11px; text-align: center; }
+
+/* === MAIN CONTENT === */
+.user-main {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: white; padding: 10px; border: 1px solid #ddd;}
+.toolbar-left, .toolbar-right { display: flex; align-items: center; gap: 10px; }
+.text-red { color: #cc0000; font-size: 14px; font-weight: bold; }
+select { padding: 4px; border: 1px solid #ccc; font-size: 12px; }
+
+.pagination-mini { display: flex; gap: 3px; }
+.pagination-mini button { border: 1px solid #999; background: #fff; padding: 3px 8px; cursor: pointer; font-size: 12px; }
+.pagination-mini button.active { background: #4a86e8; color: white; border-color: #4a86e8; }
+
+/* === CARD GRID LAYOUT === */
+.user-list { display: flex; flex-direction: column; gap: 20px; }
+.user-card { background: white; border: 1px solid #ccc; }
+
+.card-header {
+    background-color: #000066;
+    color: white;
+    padding: 6px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+.card-header-left a { color: white; text-decoration: underline; cursor: pointer; margin-left: 5px; }
+.btn-menu { background: #e0e0e0; border: 1px solid #999; padding: 2px 10px; cursor: pointer; font-weight: bold; color: #000; }
+
+.card-body {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px 1fr;
+}
+.cell { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; display: flex; align-items: center; min-height: 20px;}
+.cell:nth-child(4n) { border-right: none; }
+.cell-label { background-color: #dbeafc; color: #000; }
+.cell-value { background-color: #fff; color: #333; }
+
+/* =========================================================
+   STYLE CHO DROPDOWN MENU (BULK ACTION & MENU CÁ NHÂN)
+========================================================= */
+
+/* Container bọc ngoài cùng */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Nội dung menu thả xuống (Ẩn mặc định) */
+.dropdown-content {
+    display: none; /* Mặc định ẩn */
+    position: absolute; /* Nổi lên trên, không đẩy các element khác */
+    background-color: #fff;
+    min-width: 220px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border: 1px solid #ccc;
+    z-index: 1000; /* Đảm bảo luôn nằm trên cùng */
+    top: 100%; /* Nằm ngay dưới nút bấm */
+}
+
+/* Ép menu của nút bấm góc phải thì thả sang bên trái để không bị tràn màn hình */
+.card-header-right .dropdown-content {
+    right: 0;
+    left: auto;
+}
+
+/* Các thẻ a (nút bấm) bên trong menu */
+.dropdown-content a {
+    color: black;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block; /* Ép các thẻ a xếp dọc xuống dòng */
+    cursor: pointer;
+    font-size: 12px;
+    border-bottom: 1px dashed #eee; /* Đường kẻ mờ ngăn cách các menu item */
+}
+
+/* Bỏ đường kẻ ở item cuối cùng */
+.dropdown-content a:last-child {
+    border-bottom: none;
+}
+
+/* Hiệu ứng hover khi di chuột vào menu item */
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+    color: #000066;
+    font-weight: bold;
+}
+
+/* Class 'show' được JS add vào khi click để hiển thị menu */
+.dropdown-content.show {
+    display: block;
+}
+/* =========================================================
+   STYLE CHO MODAL (POPUP)
+========================================================= */
+
+/* Lớp phủ nền đen mờ toàn màn hình */
+.modal {
+    display: none; /* Ẩn mặc định, chỉ hiện khi JS gọi */
+    position: fixed; 
+    z-index: 2000; /* Nằm trên cùng của mọi thành phần */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5); /* Nền đen mờ 50% */
+}
+
+/* Khung nội dung chính của Modal */
+.modal-content {
+    background-color: #fff;
+    margin: 5% auto; /* Cách top 5% và căn giữa ngang */
+    border: 1px solid #888;
+    border-radius: 5px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    animation-name: animatetop; /* Hiệu ứng trượt nhẹ */
+    animation-duration: 0.3s;
+}
+
+/* Hiệu ứng trượt từ trên xuống */
+@keyframes animatetop {
+    from {top: -50px; opacity: 0}
+    to {top: 0; opacity: 1}
+}
+
+/* Header của Modal (Màu xanh đậm cho đồng bộ) */
+.modal-header {
+    padding: 10px 15px;
+    background-color: #000066;
+    color: white;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+/* Nút đóng (Dấu X) */
+.close {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close:hover,
+.close:focus {
+    color: #ff9900;
+    text-decoration: none;
+}
+
+/* Phần Body (Chứa Textbox / Bảng) */
+.modal-body {
+    padding: 15px;
+}
+
+/* Phần Footer (Chứa nút bấm) */
+.modal-footer {
+    padding: 10px 15px;
+    background-color: #f1f1f1;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    text-align: right; /* Căn nút sang phải */
+}
+
+/* Nút bấm trong Footer */
+.modal-footer button {
+    padding: 6px 15px;
+    margin-left: 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    font-weight: bold;
+    font-size: 13px;
+    border: none;
+}
+
+.btn-primary {
+    background-color: #000066;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #000044;
+}
+
+.btn-secondary {
+    background-color: #ccc;
+    color: black;
+}
+
+.btn-secondary:hover {
+    background-color: #bbb;
+}
+
+/* CSS Cho Bảng User Detail bên trong Modal */
+.history-table {
+    border-collapse: collapse;
+}
+.history-table th {
+    background-color: #dbeafc; /* Xanh nhạt */
+    padding: 8px;
+    border: 1px solid #ccc;
+    font-weight: normal;
+}
+.history-table td {
+    padding: 8px;
+    border: 1px solid #ccc;
+}
+/* =========================================================
+   STYLE ĐẶC BIỆT CHO NÚT BẤM TRONG MODAL EDIT USER
+========================================================= */
+
+/* Nút Cancel (Màu xám nhạt, chữ đen) */
+.btn-cancel {
+    background-color: #cccccc;
+    color: #000;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    border-radius: 4px; /* Bo góc nhẹ */
+    margin-right: 10px;
+}
+
+.btn-cancel:hover {
+    background-color: #bbbbbb;
+}
+
+/* Nút Save Changes (Màu xanh đen đặc trưng của giao diện) */
+.btn-save {
+    background-color: #000066;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    border-radius: 4px; /* Bo góc nhẹ */
+}
+
+.btn-save:hover {
+    background-color: #000044;
+}
+
+/* Xóa bỏ đường viền xám mặc định ở chân Modal để giao diện liền mạch hơn */
+#userEditModal .modal-content {
+    border-radius: 0; /* Cho vuông vức giống ảnh */
+}
+
+#userEditModal .modal-header {
+    padding: 10px 15px;
+    font-size: 14px;
+}

@@ -1,0 +1,291 @@
+<link rel="stylesheet" href="../../css/import-management.css">
+
+<div class="import-layout">
+
+    <!-- ===================== SIDEBAR ===================== -->
+    <div class="import-sidebar">
+        <div class="search-header">Import Data</div>
+
+        <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('hardware')" id="tab-hardware">
+                <span class="tab-icon">🖥</span> Hardware
+            </button>
+            <button class="tab-btn" onclick="switchTab('software')" id="tab-software">
+                <span class="tab-icon">💿</span> Software
+            </button>
+            <button class="tab-btn" onclick="switchTab('license')" id="tab-license">
+                <span class="tab-icon">🔑</span> License
+            </button>
+        </div>
+
+        <div class="sidebar-info">
+            <div class="info-title">📋 Import Rules</div>
+            <ul class="info-list">
+                <li>Validate ALL rows before inserting</li>
+                <li>If any row has errors → download error file</li>
+                <li>Max file size: <b>5 MB</b></li>
+                <li>Supported: <b>.xlsx, .xls, .csv</b></li>
+            </ul>
+        </div>
+
+        <div class="sidebar-info" style="margin-top: 10px;">
+            <div class="info-title">📥 Download Templates</div>
+            <button class="btn-template" onclick="downloadTemplate('hardware')">⬇ Hardware Template</button>
+            <button class="btn-template" onclick="downloadTemplate('software')">⬇ Software Template</button>
+            <button class="btn-template" onclick="downloadTemplate('license')">⬇ License Template</button>
+        </div>
+    </div>
+
+    <!-- ===================== MAIN CONTENT ===================== -->
+    <div class="import-main">
+
+        <!-- ===== TAB: HARDWARE ===== -->
+        <div id="panel-hardware" class="import-panel active">
+            <div class="panel-header">
+                <h2 class="panel-title">Hardware Import <span class="panel-subtitle">一括インポート</span></h2>
+                <p class="panel-desc">Upload an Excel/CSV file to bulk-import hardware assets. All rows are validated before any data is saved.</p>
+            </div>
+
+            <div class="upload-zone" id="dropzone-hardware"
+                ondragover="handleDragOver(event, 'hardware')"
+                ondragleave="handleDragLeave(event, 'hardware')"
+                ondrop="handleDrop(event, 'hardware')">
+                <div class="upload-icon">📂</div>
+                <div class="upload-label">Drag & drop your file here</div>
+                <div class="upload-sub">or</div>
+                <label class="btn-browse" for="fileHardware">Browse File</label>
+                <input type="file" id="fileHardware" accept=".xlsx,.xls,.csv" style="display:none"
+                    onchange="handleFileSelect(event, 'hardware')">
+                <div class="upload-hint">.xlsx / .xls / .csv · Max 5 MB</div>
+            </div>
+
+            <div id="preview-hardware" class="file-preview" style="display:none">
+                <div class="preview-file">
+                    <span class="preview-icon">📄</span>
+                    <div class="preview-info">
+                        <div class="preview-name" id="fileName-hardware">-</div>
+                        <div class="preview-meta" id="fileMeta-hardware">-</div>
+                    </div>
+                    <button class="btn-remove" onclick="removeFile('hardware')" title="Remove file">✕</button>
+                </div>
+            </div>
+
+            <div class="required-columns">
+                <div class="req-title">Required Columns <span class="badge-must">Must</span></div>
+                <div class="req-grid">
+                    <div class="req-col must">Asset Control Number</div>
+                    <div class="req-col must">Asset Name</div>
+                    <div class="req-col must">Serial Number</div>
+                    <div class="req-col must">Category ID</div>
+                    <div class="req-col must">Status ID</div>
+                    <div class="req-col must">Location ID</div>
+                    <div class="req-col must">Department ID</div>
+                    <div class="req-col optional">Manufacturer</div>
+                    <div class="req-col optional">Model</div>
+                    <div class="req-col optional">Purchase Date</div>
+                    <div class="req-col optional">Warranty Expiry</div>
+                    <div class="req-col optional">Notes</div>
+                </div>
+            </div>
+
+            <div class="import-actions">
+                <button class="btn-import" id="btnImport-hardware" onclick="submitImport('hardware')" disabled>
+                    ↑ Import Hardware
+                </button>
+                <button class="btn-template-inline" onclick="downloadTemplate('hardware')">
+                    ⬇ Download Template
+                </button>
+            </div>
+
+            <div id="result-hardware" class="import-result" style="display:none"></div>
+        </div>
+
+        <!-- ===== TAB: SOFTWARE ===== -->
+        <div id="panel-software" class="import-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">Software Import <span class="panel-subtitle">一括インポート</span></h2>
+                <p class="panel-desc">Upload an Excel/CSV file to bulk-import installed software records. Asset Control Number must exist in the system.</p>
+            </div>
+
+            <div class="upload-zone" id="dropzone-software"
+                ondragover="handleDragOver(event, 'software')"
+                ondragleave="handleDragLeave(event, 'software')"
+                ondrop="handleDrop(event, 'software')">
+                <div class="upload-icon">📂</div>
+                <div class="upload-label">Drag & drop your file here</div>
+                <div class="upload-sub">or</div>
+                <label class="btn-browse" for="fileSoftware">Browse File</label>
+                <input type="file" id="fileSoftware" accept=".xlsx,.xls,.csv" style="display:none"
+                    onchange="handleFileSelect(event, 'software')">
+                <div class="upload-hint">.xlsx / .xls / .csv · Max 5 MB</div>
+            </div>
+
+            <div id="preview-software" class="file-preview" style="display:none">
+                <div class="preview-file">
+                    <span class="preview-icon">📄</span>
+                    <div class="preview-info">
+                        <div class="preview-name" id="fileName-software">-</div>
+                        <div class="preview-meta" id="fileMeta-software">-</div>
+                    </div>
+                    <button class="btn-remove" onclick="removeFile('software')" title="Remove file">✕</button>
+                </div>
+            </div>
+
+            <div class="required-columns">
+                <div class="req-title">Required Columns <span class="badge-must">Must</span></div>
+                <div class="req-grid">
+                    <div class="req-col must">Asset Control Number</div>
+                    <div class="req-col must">Software Name</div>
+                    <div class="req-col must">Software Version</div>
+                    <div class="req-col optional">Software Type</div>
+                    <div class="req-col optional">Vendor ID</div>
+                    <div class="req-col optional">License ID</div>
+                    <div class="req-col optional">License Type</div>
+                    <div class="req-col optional">Description</div>
+                    <div class="req-col optional">Installed By (User ID)</div>
+                    <div class="req-col optional">Install Date</div>
+                </div>
+            </div>
+
+            <div class="import-actions">
+                <button class="btn-import" id="btnImport-software" onclick="submitImport('software')" disabled>
+                    ↑ Import Software
+                </button>
+                <button class="btn-template-inline" onclick="downloadTemplate('software')">
+                    ⬇ Download Template
+                </button>
+            </div>
+
+            <div id="result-software" class="import-result" style="display:none"></div>
+        </div>
+
+        <!-- ===== TAB: LICENSE ===== -->
+        <div id="panel-license" class="import-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">License Import <span class="panel-subtitle">一括インポート</span></h2>
+                <p class="panel-desc">Upload an Excel/CSV file to bulk-import license records. License Management Numbers are generated automatically.</p>
+            </div>
+
+            <div class="upload-zone" id="dropzone-license"
+                ondragover="handleDragOver(event, 'license')"
+                ondragleave="handleDragLeave(event, 'license')"
+                ondrop="handleDrop(event, 'license')">
+                <div class="upload-icon">📂</div>
+                <div class="upload-label">Drag & drop your file here</div>
+                <div class="upload-sub">or</div>
+                <label class="btn-browse" for="fileLicense">Browse File</label>
+                <input type="file" id="fileLicense" accept=".xlsx,.xls,.csv" style="display:none"
+                    onchange="handleFileSelect(event, 'license')">
+                <div class="upload-hint">.xlsx / .xls / .csv · Max 5 MB</div>
+            </div>
+
+            <div id="preview-license" class="file-preview" style="display:none">
+                <div class="preview-file">
+                    <span class="preview-icon">📄</span>
+                    <div class="preview-info">
+                        <div class="preview-name" id="fileName-license">-</div>
+                        <div class="preview-meta" id="fileMeta-license">-</div>
+                    </div>
+                    <button class="btn-remove" onclick="removeFile('license')" title="Remove file">✕</button>
+                </div>
+            </div>
+
+            <div class="required-columns">
+                <div class="req-title">Required Columns <span class="badge-must">Must</span></div>
+                <div class="req-grid">
+                    <div class="req-col must">Installation Name</div>
+                    <div class="req-col must">Software Type</div>
+                    <div class="req-col must">License Type</div>
+                    <div class="req-col must">License Format</div>
+                    <div class="req-col must">Counting Method</div>
+                    <div class="req-col must">Number of Licenses</div>
+                    <div class="req-col optional">Publisher Name</div>
+                    <div class="req-col optional">License Key</div>
+                    <div class="req-col optional">Expiry Date</div>
+                    <div class="req-col optional">Academic Flag</div>
+                    <div class="req-col optional">Management Dept ID</div>
+                    <div class="req-col optional">Description</div>
+                </div>
+            </div>
+
+            <div class="import-actions">
+                <button class="btn-import" id="btnImport-license" onclick="submitImport('license')" disabled>
+                    ↑ Import License
+                </button>
+                <button class="btn-template-inline" onclick="downloadTemplate('license')">
+                    ⬇ Download Template
+                </button>
+            </div>
+
+            <div id="result-license" class="import-result" style="display:none"></div>
+        </div>
+
+    </div><!-- /.import-main -->
+</div><!-- /.import-layout -->
+
+
+<!-- ============================================================
+     MODAL: IMPORT PROGRESS / CONFIRM
+============================================================ -->
+<div id="importProgressModal" class="modal" style="z-index: 3000;">
+    <div class="modal-content" style="width: 460px; margin-top: 12%;">
+        <div class="modal-header" style="background:#000066;">
+            <h3 id="importModalTitle">Importing…</h3>
+            <span class="close" onclick="closeImportModal('importProgressModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 28px 20px; text-align: center;">
+            <div class="spinner" id="importSpinner"></div>
+            <p id="importProgressMsg" style="margin-top: 15px; font-size: 14px; color: #555; line-height: 1.6;"></p>
+        </div>
+    </div>
+</div>
+
+<!-- SUCCESS MODAL -->
+<div id="importSuccessModal" class="modal" style="z-index: 3001;">
+    <div class="modal-content" style="width: 480px; margin-top: 12%;">
+        <div class="modal-header" style="background:#1b5e20;">
+            <h3 id="importSuccessTitle">Import Completed</h3>
+            <span class="close" onclick="closeImportModal('importSuccessModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 28px 24px; text-align: center;">
+            <div style="font-size: 52px; line-height: 1; margin-bottom: 12px;">✅</div>
+            <div id="importSuccessHeadline" style="font-size: 17px; font-weight: bold; color: #1b5e20; margin-bottom: 10px;"></div>
+            <div id="importSuccessMsg" style="font-size: 13px; color: #555; margin-bottom: 22px; line-height: 1.6;"></div>
+
+            <!-- Stats row -->
+            <div id="importSuccessStats" style="display: flex; border: 1px solid #c8e6c9; border-radius: 4px; overflow: hidden; margin-bottom: 24px;">
+                <div style="flex:1; padding: 14px 0; background:#f1f8e9; border-right: 1px solid #c8e6c9;">
+                    <div id="successStatTotal" style="font-size: 26px; font-weight: bold; color: #000066;">0</div>
+                    <div style="font-size: 11px; color: #777; margin-top: 3px;">Total Rows</div>
+                </div>
+                <div style="flex:1; padding: 14px 0; background:#f1f8e9;">
+                    <div id="successStatCount" style="font-size: 26px; font-weight: bold; color: #2e7d32;">0</div>
+                    <div style="font-size: 11px; color: #777; margin-top: 3px;">Successfully Imported</div>
+                </div>
+            </div>
+
+            <button onclick="closeImportModal('importSuccessModal')"
+                style="background:#1b5e20; color:white; border:none; padding:10px 36px; cursor:pointer;
+                       font-size:14px; font-weight:bold; border-radius:2px; min-width:120px;">
+                OK
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ALERT MODAL -->
+<div id="importAlertModal" class="modal" style="z-index: 3001;">
+    <div class="modal-content" style="width: 420px; margin-top: 15%;">
+        <div class="modal-header" id="importAlertHeader" style="background:#000066;">
+            <h3 id="importAlertTitle">Notification</h3>
+            <span class="close" onclick="closeImportModal('importAlertModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px 15px;">
+            <p id="importAlertMsg" style="margin:0; font-size:14px; line-height:1.5;"></p>
+        </div>
+        <div class="modal-footer" style="text-align:center; padding:15px;">
+            <button onclick="closeImportModal('importAlertModal')"
+                style="background:#000066; color:white; border:none; padding:8px 28px; cursor:pointer; font-size:13px; font-weight:bold; min-width:90px;">OK</button>
+        </div>
+    </div>
+</div>

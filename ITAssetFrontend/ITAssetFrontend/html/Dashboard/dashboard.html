@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IT Asset Dashboard</title>
+    <link rel="stylesheet" href="../../css/Dashboard/dashboard.css">
+    <style>
+        /* CSS nội bộ nhỏ để format bảng Approvals trên Dashboard nếu cần */
+        .approvals-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .approvals-table th, .approvals-table td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+        .approvals-table th { background-color: #f0f4f8; }
+        .btn-view { background-color: #4a86e8; color: white; border: none; padding: 5px 10px; cursor: pointer; font-size: 12px; border-radius: 3px; }
+        .btn-view:hover { background-color: #2b6bd1; }
+    </style>
+</head>
+<body>
+<!-- ============ HEADER MỚI ============ -->
+<header class="app-header">
+    <div class="app-header-left">
+        <img src="../../assets/logo.png" alt="logo" class="app-logo" onerror="this.style.display='none'">
+        <div class="app-title">
+            <div class="app-name">ITAsset <span class="app-name-jp">コンシェル</span></div>
+            <div class="app-sub">CONSOLE</div>
+        </div>
+        <span class="app-version">8.0.2509.034</span>
+    </div>
+
+    <div class="app-header-right">
+        <span class="header-user">👤 <span id="headerUserName">-</span></span>
+
+        <!-- Menu Switch: chỉ hiện với Admin -->
+        <div class="menu-switch-wrapper" id="menuSwitchWrapper" style="display:none;">
+            <label class="menu-switch-label">Menu Switch</label>
+            <select id="menuSwitchSelect" class="menu-switch-select" onchange="onMenuSwitchChange(this.value)">
+                <option value="asset">Asset Management</option>
+                <option value="user">User Management</option>
+            </select>
+        </div>
+
+        <a href="#" id="headerPasswordChange" class="header-link">Password Change</a>
+        <a href="#" id="headerLogout" class="header-link">Logout</a>
+    </div>
+</header>
+<!-- ===================================== -->
+<div class="layout">
+
+    <aside class="sidebar">
+        <h2 class="logo">IT Asset</h2>
+
+       <nav>
+    <a href="#" data-page="approvals" data-group="common" style="font-weight: bold; color: #ff9900;">Pending Approvals</a>
+    <a href="#" data-page="overview" data-group="common">Dashboard</a>
+    <a href="#" data-page="hardware" data-group="asset">Hardware</a>
+    <a href="#" data-page="software" data-group="asset">Software</a>
+    <a href="#" data-page="request" data-group="common">Requests</a>
+    <a href="#" data-page="software-management" data-group="asset">Software Management</a>
+    <a href="#" data-page="hardware-management" data-group="asset">Hardware Management</a>
+    <a href="#" data-page="license-management" data-group="asset">License Management</a>
+    <a href="#" data-page="import-management" data-group="asset">Import Data</a>
+<div class="admin-only" data-group="user">
+    <a href="#" data-page="users" data-group="user">Users</a>
+    <a href="#" data-page="departments" data-group="user">Departments</a>
+</div>
+</nav>
+
+        <button id="logoutBtn">Logout</button>
+    </aside>
+
+    <main class="main">
+
+        <header>
+            <h1 id="pageTitle">Dashboard</h1>
+        </header>
+
+        <section id="content">
+            </section>
+
+    </main>
+
+</div>
+
+<div id="customConfirmModal" class="modal" style="z-index: 9999;">
+    <div class="modal-content" style="width: 400px; margin-top: 15%; border-radius: 0;">
+        <div class="modal-header">
+            <h3 id="confirmTitle">Confirm Action</h3>
+            <span class="close" onclick="document.getElementById('customConfirmModal').style.display='none'">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px 15px;">
+            <p id="confirmMessage" style="margin: 0; font-size: 14px; line-height: 1.5;"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="document.getElementById('customConfirmModal').style.display='none'" style="background-color: #cccccc; color: #000; border: none; padding: 8px 16px; cursor: pointer; font-weight: bold; font-size: 13px; border-radius: 4px; margin-right: 10px;">Cancel</button>
+            <button class="btn-save" id="btnConfirmYes" style="background-color: #000066; color: white; border: none; padding: 8px 16px; cursor: pointer; font-weight: bold; font-size: 13px; border-radius: 4px;">Yes</button>
+        </div>
+    </div>
+</div>
+
+<div id="customAlertModal" class="modal" style="z-index: 9999;">
+    <div class="modal-content" style="width: 400px; margin-top: 15%; border-radius: 0;">
+        <div class="modal-header" style="background-color: #d32f2f;">
+            <h3 id="alertTitle">Notification</h3>
+            <span class="close" onclick="document.getElementById('customAlertModal').style.display='none'">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px 15px;">
+            <p id="alertMessage" style="margin: 0; font-size: 14px; line-height: 1.5;"></p>
+        </div>
+        <div class="modal-footer" style="text-align: center;">
+            <button class="btn-save" onclick="document.getElementById('customAlertModal').style.display='none'" style="background-color: #000066; color: white; border: none; padding: 8px 16px; cursor: pointer; font-weight: bold; font-size: 13px; border-radius: 4px; min-width: 100px;">OK</button>
+        </div>
+    </div>
+</div>
+
+<div id="approvalDetailModal" class="modal" style="z-index: 9998; display: none;">
+    <div class="modal-content" style="width: 600px; margin-top: 5%; border-radius: 0;">
+        <div class="modal-header" style="background-color: #000066;">
+            <h3>Review Request</h3>
+            <span class="close" onclick="document.getElementById('approvalDetailModal').style.display='none'">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="apprReqId">
+            <h4 style="margin-top: 0;">Request Information</h4>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 13px;">
+                <tr><th style="text-align:left; width: 120px;">Request ID:</th><td id="apprId"></td></tr>
+                <tr><th style="text-align:left;">Type:</th><td id="apprType"></td></tr>
+                <tr><th style="text-align:left;">Description:</th><td id="apprDesc"></td></tr>
+            </table>
+
+            <h4>Request Details (Changes)</h4>
+            <div style="max-height: 150px; overflow-y: auto; margin-bottom: 15px;">
+                <table class="approvals-table" style="margin-top: 0; font-size: 12px;">
+                    <thead><tr><th>Field</th><th>Old Value</th><th>New Value</th></tr></thead>
+                    <tbody id="apprDetailsBody"></tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 10px;">
+                <label style="font-weight: bold; font-size: 13px; color: #555;">Remarks / Reason (Optional):</label>
+                <textarea id="apprRemarks" rows="3" style="width: 100%; margin-top: 5px; padding: 8px; border: 1px solid #ccc; font-family: inherit; font-size: 13px; box-sizing: border-box;"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer" style="text-align: right; background-color: #f9f9f9; padding: 15px;">
+            <button onclick="document.getElementById('approvalDetailModal').style.display='none'" style="background-color: #ccc; border: none; padding: 8px 16px; cursor: pointer; font-weight: bold; font-size: 13px; border-radius: 4px; color: black;">Cancel</button>
+            <button id="btnRejectReq" onclick="submitReject()" style="background-color: #d32f2f; color: white; border: none; padding: 8px 16px; cursor: pointer; font-weight: bold; font-size: 13px; border-radius: 4px; margin-left: 10px;">Reject</button>
+            <button id="btnApproveReq" onclick="submitApprove()" style="background-color: #4a86e8; color: white; border: none; padding: 8px 16px; cursor: pointer; font-weight: bold; font-size: 13px; border-radius: 4px; margin-left: 10px;">Approve</button>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="../../js/Dashboard/dashboard.js"></script>
+</body>
+</html>

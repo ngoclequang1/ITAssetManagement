@@ -1,0 +1,387 @@
+/* =========================================================
+   LAYOUT CHÍNH (2 CỘT)
+========================================================= */
+.software-layout {
+    display: flex;
+    gap: 20px;
+    padding: 15px;
+    background: #f8f9fa;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #333;
+}
+
+/* === SIDEBAR LỌC (CỘT TRÁI) === */
+.software-sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background: #f0f4f8;
+    padding: 15px;
+    border: 1px solid #ccc;
+    height: fit-content;
+}
+
+.search-header {
+    background: #000066;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.filter-group { 
+    margin-bottom: 15px; 
+}
+
+.filter-group > label {
+    display: block;
+    background: #dbeafc; /* Màu nền tiêu đề filter */
+    padding: 6px;
+    border-bottom: 1px solid #ccc;
+    font-weight: normal;
+    margin-bottom: 5px;
+    font-size: 12px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+    font-size: 12px;
+}
+
+.filter-actions { 
+    display: block; 
+    margin-top: 15px; 
+}
+
+.btn-danger {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    width: 100%;
+    font-weight: bold;
+}
+
+/* === MAIN CONTENT (CỘT PHẢI) === */
+.software-main {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+
+/* =========================================================
+   TOOLBAR & PAGINATION
+========================================================= */
+.toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.toolbar-left, .toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-outline {
+    border: 1px solid #999;
+    background: #fff;
+    padding: 4px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.showing-text { font-size: 13px; }
+.text-red { color: #cc0000; font-size: 15px; font-weight: bold; }
+select { padding: 4px; border: 1px solid #ccc; font-size: 12px; }
+
+.pagination-mini { display: flex; gap: 3px; }
+.pagination-mini button { border: 1px solid #999; background: #fff; padding: 3px 8px; cursor: pointer; font-size: 12px; min-width: 24px; }
+.pagination-mini button.active { background: #4a86e8; color: white; border-color: #4a86e8; }
+
+
+/* =========================================================
+   LIST & CARD GRID 4 CỘT
+========================================================= */
+.software-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.software-card {
+    background: white;
+    border: 1px solid #ccc;
+}
+
+/* Header màu xanh đậm */
+.card-header {
+    background-color: #000066;
+    color: white;
+    padding: 6px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+
+.card-header-left { display: flex; align-items: center; gap: 8px; }
+.card-header-left a { color: white; text-decoration: underline; cursor: pointer; }
+
+.card-header-right { display: flex; align-items: center; gap: 10px; }
+.card-header-right a { color: white; text-decoration: none; font-weight: normal; }
+
+/* Nội dung dạng Grid 4 cột */
+.card-body {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px 1fr;
+}
+
+.cell {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eee;
+    border-right: 1px solid #eee;
+    word-break: break-word;
+    display: flex;
+    align-items: center;
+}
+
+/* Xóa border phải của cột cuối cùng */
+.cell:nth-child(4n) { border-right: none; }
+
+.cell-label {
+    background-color: #e6f0ff; /* Màu xanh nhạt cho các ô tiêu đề */
+    color: #333;
+}
+.cell-value { background-color: #fff; }
+
+
+/* =========================================================
+   STYLE CHO DROPDOWN MENU (BULK ACTION & MENU CÁ NHÂN)
+========================================================= */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.btn-menu {
+    background: #e0e0e0;
+    border: 1px solid #999;
+    padding: 2px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #000;
+}
+
+/* Nội dung menu thả xuống (Ẩn mặc định) */
+.dropdown-content {
+    display: none; 
+    position: absolute; 
+    background-color: #fff;
+    min-width: 250px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    border: 1px solid #ccc;
+    z-index: 1000; 
+    top: 100%; 
+}
+
+/* Ép menu của thẻ Card (Góc phải) thả xuống bên trái để không tràn màn hình */
+.card-header-right .dropdown-content {
+    right: 0;
+    left: auto;
+}
+
+/* Các thẻ a (nút bấm) bên trong menu */
+.dropdown-content a {
+    color: black;
+    padding: 8px 12px;
+    text-decoration: none;
+    display: block; 
+    cursor: pointer;
+    font-size: 12px;
+    border-bottom: 1px dashed #eee;
+}
+
+.dropdown-content a:last-child {
+    border-bottom: none;
+}
+
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+    color: #000066;
+    font-weight: bold;
+}
+
+/* Class 'show' được JS add vào khi click để hiển thị menu */
+.dropdown-content.show { display: block; }
+
+/* =========================================================
+   STYLE CHO CÁC KHỐI TREE-VIEW TRONG SIDEBAR
+========================================================= */
+
+/* Label riêng cho các khối Tree-view (không có nền xanh) */
+.filter-group > label.tree-label {
+    background: transparent;
+    border: none;
+    font-weight: bold;
+    padding: 0 0 5px 0;
+    font-size: 13px;
+}
+
+/* Khung trắng chứa danh sách Checkbox */
+.tree-view {
+    background: white;
+    height: 120px; /* Chiều cao cố định tạo độ dài cho sidebar */
+    border: 1px solid #888;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 12px;
+}
+
+/* Chỉnh khoảng cách các dòng checkbox bên trong */
+.tree-view label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    font-weight: normal !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.tree-view input[type="checkbox"] {
+    margin: 0;
+}
+
+/* =========================================================
+   STYLE CHO MODAL (POPUP) - BẮT BUỘC ĐỂ ẨN/HIỆN MODAL
+========================================================= */
+.modal {
+    display: none; /* ẨN MẶC ĐỊNH, CHỈ HIỆN KHI JS ĐỔI THÀNH BLOCK */
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5); /* Nền đen mờ */
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto; /* Canh giữa màn hình */
+    border-radius: 4px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    position: relative;
+}
+
+.modal-header {
+    padding: 12px 15px;
+    background: #000066; /* Xanh đậm đặc trưng */
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 15px;
+}
+
+.close {
+    color: white;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.close:hover {
+    color: #ffcccc;
+}
+
+/* Nút bấm trong Modal */
+.btn-cancel {
+    background-color: #ccc;
+    color: black;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+}
+.btn-cancel:hover { background-color: #999; }
+
+.btn-danger {
+    background-color: #d32f2f;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+}
+.btn-danger:hover { background-color: #b71c1c; }
+
+/* Chữ bắt buộc màu đỏ */
+.badge-must {
+    background: #d32f2f;
+    color: white;
+    padding: 2px 5px;
+    font-size: 10px;
+    font-weight: bold;
+    border-radius: 2px;
+    margin-left: 5px;
+}
+
+/* =========================================================
+   STYLE CHO NÚT BẤM TRONG MODAL FOOTER (CUSTOM CONFIRM & ALERT)
+========================================================= */
+.modal-footer {
+    padding: 15px;
+    border-top: 1px solid #eee;
+    text-align: right; /* Ép các nút bấm dạt sang lề phải */
+    background-color: #f9f9f9;
+}
+
+.modal-footer button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px; /* Bo góc nhẹ cho đẹp */
+    font-weight: bold;
+    font-size: 13px;
+    cursor: pointer;
+    margin-left: 10px; /* Tạo khoảng cách giữa các nút */
+}
+
+/* Style cho nút Cancel / No */
+.modal-footer .btn-cancel {
+    background-color: #ccc;
+    color: black;
+}
+
+.modal-footer .btn-cancel:hover {
+    background-color: #999;
+}
+
+/* Style cho nút Yes / Save / Confirm */
+.modal-footer .btn-save,
+.modal-footer #btnConfirmYes {
+    background-color: #000066; /* Màu xanh sậm đồng bộ với header */
+    color: white;
+}
+
+.modal-footer .btn-save:hover,
+.modal-footer #btnConfirmYes:hover {
+    background-color: #00004d;
+}

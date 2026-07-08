@@ -1,0 +1,317 @@
+<link rel="stylesheet" href="../../css/user-list.css">
+
+<div class="user-layout">
+    
+    <div class="user-sidebar">
+        <div class="search-header">Current search criteria</div>
+        
+        <div class="search-actions">
+            <button class="btn-outline" onclick="searchUsers()">Search</button>
+            <button class="btn-outline" onclick="clearUserSearch()">Deselect All</button>
+            <button class="btn-outline" onclick="resetUserSearch()">Reset</button>
+            <button class="btn-outline">Expand fully</button>
+        </div>
+
+        <div class="filter-group">
+            <label><input type="checkbox" checked> Main Affiliated Deployment</label>
+            <label><input type="checkbox"> Concurrent department</label>
+        </div>
+
+        <div class="tree-view">
+            <label><input type="checkbox" checked> <span>Advance Group</span></label><br>
+            <label><input type="checkbox" checked> <span>A1111</span></label><br>
+            <label><input type="checkbox" checked> <span>Htest1</span></label><br>
+            <label><input type="checkbox" checked> <span>Htest2</span></label><br>
+            <label><input type="checkbox" checked> <span>VER80-01</span></label>
+        </div>
+
+        <div class="filter-group">
+            <label>User Code</label>
+            <input type="text" id="filterUserCode" class="form-control">
+        </div>
+
+        <div class="filter-group">
+            <label>Username</label>
+            <input type="text" id="filterUsername" class="form-control">
+        </div>
+
+        <div class="filter-group">
+            <label>Console Login ID</label>
+            <input type="text" id="filterConsoleLoginId" class="form-control">
+        </div>
+
+        <div class="filter-group">
+            <label>Email address</label>
+            <input type="text" id="filterEmail" class="form-control">
+        </div>
+
+        <div class="filter-group">
+            <label>Permissions</label>
+            <div class="checkbox-container" style="display: flex; flex-direction: column; gap: 5px;">
+                <label><input type="checkbox" value="2"> General Users</label>
+                <label><input type="checkbox" value="3"> Department Representative</label>
+                <label><input type="checkbox" value="4"> Department Administrator</label>
+                <label><input type="checkbox" value="5"> General Manager</label>
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <label>Primary department code</label>
+            <input type="text" id="filterDeptCode" class="form-control">
+        </div>
+
+        <div class="filter-group">
+            <label>Auditor flag</label>
+            <div class="checkbox-container" style="display: flex; gap: 10px;">
+                <label><input type="checkbox" id="filterAuditor"> Auditor</label>
+                <label><input type="checkbox" id="filterNonAuditor"> Non-auditor</label>
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <label>View deleted information</label>
+            <div class="checkbox-container">
+                <label><input type="checkbox" id="filterDeleted"> Deleted</label>
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button class="btn-danger" onclick="searchUsers()">Search</button>
+            <button class="btn-secondary" onclick="clearUserSearch()">Clear</button>
+        </div>
+    </div>
+
+    <div class="user-main">
+        
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <button class="btn-outline" 
+                style="background-color: #4a86e8; color: white; border: none; font-weight: bold; margin-right: 10px;"
+                onclick="openAddUserModal()">+ Add New User</button>
+                <div class="dropdown">
+                <button class="btn-outline" onclick="toggleBulkDropdown(event, this)">Bulk Operation Menu ▼</button>
+                <div class="dropdown-content" style="left: 0; right: auto;">
+                    <a onclick="selectAllUsers(true)">▶ Select All</a>
+                    <a onclick="selectAllUsers(false)">▶ Deselect All</a>
+                    <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ddd;">
+                    <a onclick="downloadSelectedUsers()">▶ Download Selected</a>
+                    <a onclick="downloadAllUsers()">▶ Download All</a>
+                </div>
+            </div>
+                <span class="showing-text">
+                    Showing <b id="uShowStartTop">0</b> - <b id="uShowEndTop">0</b> of <b class="text-red" id="uTotalTop">0</b> results 
+                    (including <b class="text-red" id="uTotalAffTop">0</b> of <b class="text-red" id="uTotalAffMaxTop">0</b> Principal Affiliations)
+                </span>
+            </div>
+            <div class="toolbar-right">
+                <select id="uPageSizeTop" onchange="changeUserPageSize(this.value)">
+                    <option value="10">10 Show</option>
+                    <option value="20">20 Show</option>
+                    <option value="50">50 Show</option>
+                </select>
+                <span>Display order</span>
+                <select><option>User Code</option></select>
+                <select><option>Surrender order</option></select>
+                <div id="uPaginationTop" class="pagination-mini"></div>
+            </div>
+        </div>
+
+        <div id="userListContainer" class="user-list"></div>
+
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <button class="btn-outline" 
+                style="background-color: #4a86e8; color: white; border: none; font-weight: bold; margin-right: 10px;"
+                onclick="openAddUserModal()">+ Add New User</button>
+                <button class="btn-outline">Bulk Operation Menu</button>
+                <span class="showing-text">
+                    Showing <b id="uShowStartBottom">0</b> - <b id="uShowEndBottom">0</b> of <b class="text-red" id="uTotalBottom">0</b> results
+                </span>
+            </div>
+            <div class="toolbar-right">
+                <select id="uPageSizeBottom" onchange="changeUserPageSize(this.value)">
+                    <option value="10">10 Show</option>
+                    <option value="20">20 Show</option>
+                    <option value="50">50 Show</option>
+                </select>
+                <span>Display order</span>
+                <select><option>User Code</option></select>
+                <select><option>Surrender order</option></select>
+                <div id="uPaginationBottom" class="pagination-mini"></div>
+            </div>
+        </div>
+
+    </div>
+    <div id="userDetailModal" class="modal">
+        <div class="modal-content" style="width: 600px;">
+            <div class="modal-header">
+                <h3>User Details</h3>
+                <span class="close" onclick="closeModal('userDetailModal')">&times;</span>
+            </div>
+            <div class="modal-body" style="line-height: 1.8;">
+                <table class="history-table" style="width: 100%; text-align: left;">
+                    <tr><th style="width: 30%;">User ID</th><td id="detailUserId"></td></tr>
+                    <tr><th>User Code</th><td id="detailUserCode"></td></tr>
+                    <tr><th>Username</th><td id="detailUsername"></td></tr>
+                    <tr><th>Email</th><td id="detailEmail"></td></tr>
+                    <tr><th>Console Login ID</th><td id="detailConsoleId"></td></tr>
+                    <tr><th>System Login ID</th><td id="detailSystemId"></td></tr>
+                    <tr><th>Department Code</th><td id="detailDeptCode"></td></tr>
+                    <tr><th>Department Name</th><td id="detailDeptName"></td></tr>
+                    <tr><th>Role / Permissions</th><td id="detailRole"></td></tr>
+                    <tr><th>Auditor Flag</th><td id="detailAuditor"></td></tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('userDetailModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="userEditModal" class="modal">
+    <div class="modal-content" style="width: 400px;">
+        <div class="modal-header">
+            <h3>Edit User</h3>
+            <span class="close" onclick="closeModal('userEditModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="editUserId">
+            
+            <div class="form-group">
+                <label style="font-weight: normal; color: #555; margin-bottom: 3px;">Username</label>
+                <input type="text" id="editUsername" class="form-control" style="padding: 6px; border: 1px solid #ccc; border-radius: 0;">
+            </div>
+            
+            <div class="form-group" style="margin-top: 10px;">
+                <label style="font-weight: normal; color: #555; margin-bottom: 3px;">Email Address</label>
+                <input type="email" id="editEmail" class="form-control" style="padding: 6px; border: 1px solid #ccc; border-radius: 0;">
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+                <label style="font-weight: normal; color: #555; margin-bottom: 3px;">Console Login ID</label>
+                <input type="text" id="editConsoleId" class="form-control" style="padding: 6px; border: 1px solid #ccc; border-radius: 0;">
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+                <label style="font-weight: normal; color: #555; margin-bottom: 3px;">Permissions (Role)</label>
+                <select id="editRole" class="form-control" style="padding: 6px; border: 1px solid #ccc; border-radius: 0;">
+                    <option value="1">ADMIN</option>
+                    <option value="2">General Users</option>
+                    <option value="3">Department Representative</option>
+                    <option value="4">Department Administrator</option>
+                    <option value="5">General Manager</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-top: 10px; margin-bottom: 20px;">
+                <label style="font-weight: normal; color: #555; margin-bottom: 3px;">Auditor Flag</label>
+                <select id="editAuditor" class="form-control" style="padding: 6px; border: 1px solid #ccc; border-radius: 0;">
+                    <option value="false">Non-auditor</option>
+                    <option value="true">Auditor</option>
+                </select>
+            </div>
+            
+            <div style="text-align: right; margin-top: 15px;">
+                <button class="btn-cancel" onclick="closeModal('userEditModal')">Cancel</button>
+                <button class="btn-save" onclick="submitEditUser()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="customConfirmModal" class="modal" style="z-index: 3000;">
+    <div class="modal-content" style="width: 400px; margin-top: 15%;">
+        <div class="modal-header">
+            <h3 id="confirmTitle">Confirm Action</h3>
+            <span class="close" onclick="closeModal('customConfirmModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px 15px;">
+            <p id="confirmMessage" style="margin: 0; font-size: 14px; line-height: 1.5;"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('customConfirmModal')">Cancel</button>
+            <button class="btn-save" id="btnConfirmYes">Yes</button>
+        </div>
+    </div>
+</div>
+
+<div id="customAlertModal" class="modal" style="z-index: 3000;">
+    <div class="modal-content" style="width: 400px; margin-top: 15%;">
+        <div class="modal-header" style="background-color: #d32f2f;"> <h3 id="alertTitle">Notification</h3>
+            <span class="close" onclick="closeModal('customAlertModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px 15px;">
+            <p id="alertMessage" style="margin: 0; font-size: 14px; line-height: 1.5;"></p>
+        </div>
+        <div class="modal-footer" style="text-align: center;">
+            <button class="btn-save" onclick="closeModal('customAlertModal')" style="min-width: 100px;">OK</button>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<div id="addUserModal" class="modal">
+    <div class="modal-content" style="width: 700px; border-radius: 0; margin-top: 5%;">
+        <div class="modal-header" style="background: #000066; color: white;">
+            <h3>Add New User</h3>
+            <span class="close" onclick="closeModal('addUserModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f4f6f9; padding: 15px; border: 1px solid #ddd;">
+                
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">User Code <span class="badge-must" style="background: #d32f2f; color: white; padding: 2px 5px; font-size: 10px; border-radius: 2px;">Must</span></label>
+                    <input type="text" id="addUCode" class="form-control" placeholder="e.g., U001">
+                </div>
+                
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Username <span class="badge-must" style="background: #d32f2f; color: white; padding: 2px 5px; font-size: 10px; border-radius: 2px;">Must</span></label>
+                    <input type="text" id="addUName" class="form-control" placeholder="e.g., Nguyen Van A">
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Email <span class="badge-must" style="background: #d32f2f; color: white; padding: 2px 5px; font-size: 10px; border-radius: 2px;">Must</span></label>
+                    <input type="email" id="addUEmail" class="form-control" placeholder="e.g., a.nguyen@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Password <span class="badge-must" style="background: #d32f2f; color: white; padding: 2px 5px; font-size: 10px; border-radius: 2px;">Must</span></label>
+                    <input type="password" id="addUPassword" class="form-control" placeholder="Enter initial password">
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Console Login ID</label>
+                    <input type="text" id="addUConsole" class="form-control" placeholder="e.g., admin_user">
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">System Login ID</label>
+                    <input type="text" id="addUSystem" class="form-control" placeholder="e.g., sys_user">
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Primary Department</label>
+                    <select id="addUDept" class="form-control" style="border: 1px solid #ccc;">
+                        <option value="">-- Select Department --</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Permissions (Role)</label>
+                    <select id="addURole" class="form-control" style="border: 1px solid #ccc;">
+                        <option value="2">General Users</option>
+                        <option value="1">ADMIN</option>
+                        <option value="3">Department Representative</option>
+                        <option value="4">Department Administrator</option>
+                        <option value="5">General Manager</option>
+                    </select>
+                </div>
+
+            </div>
+        </div>
+        <div class="modal-footer" style="text-align: right; padding: 15px; border-top: 1px solid #eee;">
+            <button class="btn-cancel" onclick="closeModal('addUserModal')" style="padding: 8px 16px; background: #ccc; border: none; cursor: pointer; color: black; margin-right: 10px;">Cancel</button>
+            <button class="btn-save" onclick="submitAddUser()" style="padding: 8px 16px; background: #000066; color: white; border: none; cursor: pointer;">Create User</button>
+        </div>
+    </div>
+</div>

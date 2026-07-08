@@ -1,0 +1,490 @@
+<link rel="stylesheet" href="../../css/software-management.css">
+
+<div class="software-layout">
+    <div class="software-sidebar">
+        <div class="search-header">Current search criteria</div>
+        <div class="filter-group">
+            <label class="tree-label">IT Asset Management Department</label>
+            <div class="tree-view">
+                <label><input type="checkbox" checked> <span>Advance Group</span></label><br>
+                <label><input type="checkbox" checked> <span>Deployment unknown</span></label>
+            </div>
+        </div>
+        <div class="filter-group">
+            <label class="tree-label">Leverage Deployment</label>
+            <div class="tree-view">
+                <label><input type="checkbox" checked> <span>Advance Group</span></label><br>
+                <label><input type="checkbox" checked> <span>Deployment unknown</span></label>
+            </div>
+        </div>
+        <hr style="border: 0; border-top: 1px solid #ccc; margin: 15px 0;">
+        <div class="filter-group">
+            <label>IT Asset Control Number</label>
+            <input type="text" id="filterSwControlNumber" class="form-control">
+        </div>
+        <div class="filter-group">
+            <label>Software Name</label>
+            <input type="text" id="filterSwName" class="form-control">
+        </div>
+        <div class="filter-group">
+            <label>Versions</label>
+            <input type="text" id="filterSwVersion" class="form-control">
+        </div>
+        <div class="filter-actions">
+            <button class="btn-danger" onclick="searchSoftware()">Search screen display</button>
+            <button class="btn-outline" style="width:100%; margin-top:8px;" onclick="clearSoftwareSearch()">Clear</button>
+        </div>
+    </div>
+
+    <div class="software-main">
+        <!-- TOOLBAR TOP -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <button class="btn-outline"
+                    style="background-color: #4a86e8; color: white; border: none; font-weight: bold; margin-right: 10px;"
+                    onclick="openInstallSoftwareModal()">+ Install New Software</button>
+                <div class="dropdown">
+                    <button class="btn-outline" onclick="toggleBulkDropdown(event, this)">Bulk Operation Menu ▼</button>
+                    <div class="dropdown-content" style="left: 0; right: auto;">
+                        <a onclick="selectAllSoftwares(true)">▶ Select All (Chọn tất cả)</a>
+                        <a onclick="selectAllSoftwares(false)">▶ Deselect All (Bỏ chọn tất cả)</a>
+                        <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ddd;">
+                        <a onclick="handleBulkAction('group')">▶ Group Software</a>
+                        <a onclick="handleBulkAction('ungroup')">▶ Ungroup Software</a>
+                        <a onclick="handleBulkAction('change')">▶ Bulk Change Request</a>
+                        <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ddd;">
+                        <a onclick="downloadSelectedSoftwares()">▶ Download Selected (Tải mục đã chọn)</a>
+                        <a onclick="downloadAllSoftwares()">▶ Download All (Tải toàn bộ)</a>
+                    </div>
+                </div>
+                <span class="showing-text">Showing <b id="swShowStartTop">0</b> - <b id="swShowEndTop">0</b> of <b class="text-red" id="swTotalTop">0</b> results</span>
+            </div>
+            <div class="toolbar-right">
+                <select id="swPageSizeTop" onchange="changeSwPageSize(this.value)">
+                    <option value="10">10 Shows</option>
+                    <option value="20">20 Shows</option>
+                    <option value="50">50 Shows</option>
+                </select>
+                <span>Display order</span>
+                <select><option>Software ID</option></select>
+                <div id="swPaginationTop" class="pagination-mini"></div>
+            </div>
+        </div>
+
+        <div id="softwareList" class="software-list"></div>
+
+        <!-- TOOLBAR BOTTOM -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <button class="btn-outline"
+                    style="background-color: #4a86e8; color: white; border: none; font-weight: bold; margin-right: 10px;"
+                    onclick="openInstallSoftwareModal()">+ Install New Software</button>
+                <div class="dropdown">
+                    <button class="btn-outline" onclick="toggleBulkDropdown(event, this)">Bulk Operation Menu ▼</button>
+                    <div class="dropdown-content" style="left: 0; right: auto;">
+                        <a onclick="selectAllSoftwares(true)">▶ Select All</a>
+                        <a onclick="selectAllSoftwares(false)">▶ Deselect All</a>
+                        <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ddd;">
+                        <a onclick="handleBulkAction('group')">▶ Group Software</a>
+                        <a onclick="handleBulkAction('ungroup')">▶ Ungroup Software</a>
+                        <a onclick="handleBulkAction('change')">▶ Bulk Change Request</a>
+                        <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ddd;">
+                        <a onclick="downloadSelectedSoftwares()">▶ Download Selected</a>
+                        <a onclick="downloadAllSoftwares()">▶ Download All</a>
+                    </div>
+                </div>
+                <span class="showing-text">Showing <b id="swShowStartBottom">0</b> - <b id="swShowEndBottom">0</b> of <b class="text-red" id="swTotalBottom">0</b> results</span>
+            </div>
+            <div class="toolbar-right">
+                <select id="swPageSizeBottom" onchange="changeSwPageSize(this.value)">
+                    <option value="10">10 Shows</option>
+                    <option value="20">20 Shows</option>
+                    <option value="50">50 Shows</option>
+                </select>
+                <span>Display order</span>
+                <select><option>Software ID</option></select>
+                <div id="swPaginationBottom" class="pagination-mini"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: VIEW DETAILS
+============================================================ -->
+<div id="swDetailModal" class="modal">
+    <div class="modal-content" style="width: 650px; border-radius: 0;">
+        <div class="modal-header">
+            <h3>Software Details</h3>
+            <span class="close" onclick="closeModal('swDetailModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <table style="width: 100%; text-align: left; border-collapse: collapse;">
+                <tbody id="swDetailTableBody"></tbody>
+            </table>
+            <div style="text-align: right; margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
+                <button style="padding: 8px 16px; background: #000066; color: white; border: none; cursor: pointer; font-weight: bold;"
+                    onclick="openChangeFromDetail()">Change Application</button>
+                <button style="padding: 8px 16px; background: #d32f2f; color: white; border: none; cursor: pointer; font-weight: bold;"
+                    onclick="openUninstallFromDetail()">Uninstall</button>
+                <button style="padding: 8px 16px; background: #ccc; border: none; cursor: pointer;"
+                    onclick="closeModal('swDetailModal')">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: GROUP DETAILS
+============================================================ -->
+<div id="groupDetailsModal" class="modal">
+    <div class="modal-content" style="width: 500px; border-radius: 0;">
+        <div class="modal-header">
+            <h3>Group Details</h3>
+            <span class="close" onclick="closeModal('groupDetailsModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <p><strong>Software ID:</strong> <span id="groupDetSwId"></span></p>
+            <p><strong>Group ID:</strong> <span id="groupDetGroupId" class="text-red" style="font-weight: bold;"></span></p>
+            <div id="groupMembersContainer" style="margin-top: 15px;"></div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button style="padding: 8px 16px; background: #ccc; border: none; cursor: pointer;"
+                    onclick="closeModal('groupDetailsModal')">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: HISTORY (Application & Inventory dùng chung)
+============================================================ -->
+<div id="historyModal" class="modal">
+    <div class="modal-content" style="width: 850px; border-radius: 0;">
+        <div class="modal-header">
+            <h3 id="historyModalTitle">History</h3>
+            <span class="close" onclick="closeModal('historyModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="max-height: 450px; overflow-y: auto; padding: 20px;">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+                <thead id="historyTableHead" style="background:#000066; color:rgb(2, 2, 2);"></thead>
+                <tbody id="historyTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: CHANGE APPLICATION (POST /software/{id}/change-application)
+============================================================ -->
+<div id="changeRequestModal" class="modal">
+    <div class="modal-content" style="width: 650px; border-radius: 0;">
+        <div class="modal-header" style="background: #000066; color: white;">
+            <h3>Software Change Application</h3>
+            <span class="close" onclick="closeModal('changeRequestModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="changeSoftwareId">
+
+            <!-- Read-only info -->
+            <div style="background: #f0f4f8; padding: 10px 15px; border: 1px solid #ddd; margin-bottom: 15px; font-size: 13px;">
+                <strong>Software:</strong> <span id="changeSwNameDisplay" style="color: #000066;"></span>
+                &nbsp;|&nbsp;
+                <strong>Asset:</strong> <span id="changeSwAssetDisplay"></span>
+            </div>
+
+            <!-- Editable fields -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #f9fbfd; padding: 15px; border: 1px solid #eee; margin-bottom: 15px;">
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Software Name</label>
+                    <input type="text" id="chgSwName" data-field="software_name" class="form-control chg-sw-input" style="padding: 6px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Version</label>
+                    <input type="text" id="chgSwVersion" data-field="software_version" class="form-control chg-sw-input" style="padding: 6px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">License Type</label>
+                    <select id="chgSwLicenseType" data-field="license_type" class="form-control chg-sw-input" style="padding: 6px;">
+                        <option value="">-- No change --</option>
+                        <option value="PAID">PAID</option>
+                        <option value="FREEWARE">FREEWARE</option>
+                        <option value="TRIAL">TRIAL</option>
+                        <option value="OPEN_SOURCE">OPEN_SOURCE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Software Type</label>
+                    <input type="text" id="chgSwType" data-field="software_type" class="form-control chg-sw-input" style="padding: 6px;" placeholder="e.g., Office Suite">
+                </div>
+                <div class="form-group" style="grid-column: 1 / -1;">
+                    <label style="font-weight: bold; font-size: 12px;">Description</label>
+                    <textarea id="chgSwDesc" data-field="description" class="form-control chg-sw-input" rows="2" style="padding: 6px;"></textarea>
+                </div>
+            </div>
+
+            <!-- Approval Route -->
+            <div style="background: #eaf1fa; padding: 15px; border: 1px solid #c9d6e8; margin-bottom: 15px;">
+                <h4 style="margin-top: 0; font-size: 14px; color: #000066;">Approval Route</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label style="font-weight: bold; font-size: 12px;">
+                            First Approver <span class="badge-must">Must</span>
+                        </label>
+                        <select id="firstApp_swchange" class="form-control" style="padding: 6px;"></select>
+                    </div>
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 5px; font-size: 12px; margin-bottom: 6px;">
+                            <input type="checkbox" id="secAppFlag_swchange" checked
+                                onchange="toggleSecondaryApp('swchange')">
+                            Secondary Approval Flag (On)
+                        </label>
+                        <label style="font-weight: bold; font-size: 12px;">
+                            Second Approver <span class="badge-must" id="secAppBadge_swchange">Must</span>
+                        </label>
+                        <select id="secApp_swchange" class="form-control" style="padding: 6px;"></select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label style="font-weight: bold; font-size: 12px;">Reasons for Application</label>
+                <textarea id="reason_swchange" class="form-control" rows="2" style="padding: 6px;"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer" style="text-align: right; padding: 15px; border-top: 1px solid #eee;">
+            <button style="padding: 8px 16px; background: #ccc; border: none; cursor: pointer; margin-right: 10px;"
+                onclick="closeModal('changeRequestModal')">Cancel</button>
+            <button style="padding: 8px 16px; background: #000066; color: white; border: none; cursor: pointer; font-weight: bold;"
+                onclick="submitChangeRequest()">Submit Change Request</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: COPY REQUEST (POST /software/{id}/copy-request)
+============================================================ -->
+<div id="copyRequestModal" class="modal">
+    <div class="modal-content" style="width: 580px; border-radius: 0;">
+        <div class="modal-header" style="background: #000066; color: white;">
+            <h3>Software Copy Request</h3>
+            <span class="close" onclick="closeModal('copyRequestModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="copySoftwareId">
+
+            <!-- Source info (read-only) -->
+            <div style="background: #f0f4f8; padding: 10px 15px; border: 1px solid #ddd; margin-bottom: 15px; font-size: 13px;">
+                <strong>Source Software:</strong> <span id="copySwNameDisplay" style="color: #000066;"></span><br>
+                <strong>Source Asset:</strong> <span id="copySwAssetDisplay"></span>
+            </div>
+
+            <div style="background: #f9fbfd; padding: 15px; border: 1px solid #eee; margin-bottom: 15px;">
+                <div class="form-group" style="position: relative; margin-bottom: 12px;">
+                    <label style="font-weight: bold; font-size: 12px;">
+                        Target Asset Control Number <span class="badge-must">Must</span>
+                    </label>
+                    <input type="text" id="copyTargetAsset" class="form-control" autocomplete="off"
+                        placeholder="Gõ mã thiết bị đích..." style="padding: 6px;">
+                    <ul id="copyHwSuggestions" style="
+                        display: none; position: absolute; top: 100%; left: 0; right: 0;
+                        background: white; border: 1px solid #ccc; max-height: 180px; overflow-y: auto;
+                        z-index: 2000; list-style: none; padding: 0; margin: 0;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.15);"></ul>
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Description / Notes</label>
+                    <textarea id="copyDesc" class="form-control" rows="2" style="padding: 6px;"></textarea>
+                </div>
+            </div>
+
+            <!-- Approval Route -->
+            <div style="background: #eaf1fa; padding: 15px; border: 1px solid #c9d6e8; margin-bottom: 15px;">
+                <h4 style="margin-top: 0; font-size: 14px; color: #000066;">Approval Route</h4>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label style="font-weight: bold; font-size: 12px;">
+                            First Approver <span class="badge-must">Must</span>
+                        </label>
+                        <select id="firstApp_copy" class="form-control" style="padding: 6px;"></select>
+                    </div>
+                    <div>
+                        <label style="display: flex; align-items: center; gap: 5px; font-size: 12px; margin-bottom: 6px;">
+                            <input type="checkbox" id="secAppFlag_copy" checked
+                                onchange="toggleSecondaryApp('copy')">
+                            Secondary Approval Flag (On)
+                        </label>
+                        <label style="font-weight: bold; font-size: 12px;">
+                            Second Approver <span class="badge-must" id="secAppBadge_copy">Must</span>
+                        </label>
+                        <select id="secApp_copy" class="form-control" style="padding: 6px;"></select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer" style="text-align: right; padding: 15px; border-top: 1px solid #eee;">
+            <button style="padding: 8px 16px; background: #ccc; border: none; cursor: pointer; margin-right: 10px;"
+                onclick="closeModal('copyRequestModal')">Cancel</button>
+            <button style="padding: 8px 16px; background: #000066; color: white; border: none; cursor: pointer; font-weight: bold;"
+                onclick="submitCopyRequest()">Submit Copy Request</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: UNINSTALL CONFIRM
+     Simple confirmation before calling DELETE /api/software/{id}
+============================================================ -->
+<div id="uninstallConfirmModal" class="modal">
+    <div class="modal-content" style="width: 480px; border-radius: 0;">
+        <div class="modal-header" style="background: #d32f2f; color: white;">
+            <h3>Uninstall Software</h3>
+            <span class="close" onclick="closeModal('uninstallConfirmModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="uninstallSoftwareId">
+
+            <!-- Software info (read-only) -->
+            <div style="background: #fff3f3; padding: 12px 15px; border: 1px solid #ffcdd2; margin-bottom: 16px; border-radius: 2px;">
+                <div style="font-size: 11px; color: #888; margin-bottom: 4px;">Software to be uninstalled</div>
+                <div id="uninstallSwNameDisplay" style="font-weight: bold; font-size: 15px; color: #d32f2f;"></div>
+                <div style="font-size: 12px; color: #555; margin-top: 3px;">
+                    Asset: <span id="uninstallSwAssetDisplay" style="font-weight: bold;"></span>
+                </div>
+            </div>
+
+            <div style="color: #555; font-size: 13px; line-height: 1.6; background: #fffde7; border: 1px solid #ffe082; padding: 10px 14px; border-radius: 2px;">
+                ⚠ This action <strong>cannot be undone</strong>. The software record will be permanently removed from the system.
+                Are you sure you want to proceed?
+            </div>
+        </div>
+        <div class="modal-footer" style="text-align: right; padding: 12px 15px; border-top: 1px solid #eee;">
+            <button style="padding: 8px 16px; background: #ccc; border: none; cursor: pointer; color: black; margin-right: 10px; font-weight: bold;"
+                onclick="closeModal('uninstallConfirmModal')">Cancel</button>
+            <button id="btnConfirmUninstall"
+                style="padding: 8px 16px; background: #d32f2f; color: white; border: none; cursor: pointer; font-weight: bold;"
+                onclick="executeUninstall()">Yes, Uninstall</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: BULK CHANGE REQUEST (POST /request/bulk/change)
+============================================================ -->
+<div id="bulkChangeModal" class="modal">
+    <div class="modal-content" style="width: 520px; border-radius: 0;">
+        <div class="modal-header" style="background: #000066; color: white;">
+            <h3>Bulk Change Request</h3>
+            <span class="close" onclick="closeModal('bulkChangeModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <div style="margin-bottom: 12px; font-size: 13px;">
+                Selected: <strong class="text-red" id="bulkChangeCount">0</strong> software(s)
+            </div>
+            <div style="background: #f9fbfd; padding: 15px; border: 1px solid #eee; margin-bottom: 15px;">
+                <div class="form-group" style="margin-bottom: 10px;">
+                    <label style="font-weight: bold; font-size: 12px;">Field Name to Change <span class="badge-must">Must</span></label>
+                    <input type="text" id="bulkChangeField" class="form-control" placeholder="e.g., software_version" style="padding: 6px;">
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">New Value <span class="badge-must">Must</span></label>
+                    <input type="text" id="bulkChangeValue" class="form-control" style="padding: 6px;">
+                </div>
+            </div>
+            <div style="background: #eaf1fa; padding: 15px; border: 1px solid #c9d6e8; margin-bottom: 15px;">
+                <label style="font-weight: bold; font-size: 12px;">Approver <span class="badge-must">Must</span></label>
+                <select id="bulkChangeApp" class="form-control" style="padding: 6px; margin-top: 5px;"></select>
+            </div>
+            <div class="form-group">
+                <label style="font-size: 12px;">Description / Reasons</label>
+                <textarea id="bulkChangeDesc" class="form-control" rows="2" style="padding: 6px;"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer" style="text-align: right; padding: 15px; border-top: 1px solid #eee;">
+            <button style="padding: 8px 16px; background: #ccc; border: none; cursor: pointer; margin-right: 10px;"
+                onclick="closeModal('bulkChangeModal')">Cancel</button>
+            <button style="padding: 8px 16px; background: #000066; color: white; border: none; cursor: pointer; font-weight: bold;"
+                onclick="submitBulkChange()">Submit Bulk Request</button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     MODAL: INSTALL NEW SOFTWARE (POST /software/install)
+============================================================ -->
+<div id="installSoftwareModal" class="modal">
+    <div class="modal-content" style="width: 700px; border-radius: 0;">
+        <div class="modal-header" style="background: #000066; color: white;">
+            <h3>Install New Software</h3>
+            <span class="close" onclick="closeModal('installSoftwareModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <p style="margin-top: 0; color: #555; font-size: 13px; margin-bottom: 15px;">
+                Nhập mã thiết bị (Asset Control Number) để hệ thống tự động ghi nhận cài đặt phần mềm lên thiết bị đó.
+            </p>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: #f4f6f9; padding: 15px; border: 1px solid #ddd;">
+                <div class="form-group" style="position: relative;">
+                    <label style="font-weight: bold; font-size: 12px; color: #d32f2f;">
+                        Asset Control Number <span class="badge-must">Must</span>
+                    </label>
+                    <input type="text" id="instAssetControlNo" class="form-control" autocomplete="off"
+                        placeholder="Gõ mã để tìm (e.g., ACN00...)">
+                    <ul id="hwSuggestions" style="
+                        display: none; position: absolute; top: 100%; left: 0; right: 0;
+                        background: white; border: 1px solid #ccc;
+                        border-radius: 0 0 4px 4px; max-height: 200px; overflow-y: auto;
+                        z-index: 1000; list-style: none; padding: 0; margin: 0;
+                        box-shadow: 0 4px 10px rgba(0,0,0,0.1);"></ul>
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">
+                        Software Name <span class="badge-must">Must</span>
+                    </label>
+                    <input type="text" id="instSwName" class="form-control" placeholder="e.g., Adobe Photoshop">
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">
+                        Version <span class="badge-must">Must</span>
+                    </label>
+                    <input type="text" id="instSwVersion" class="form-control" placeholder="e.g., 2024">
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Vendor / Publisher</label>
+                    <select id="instSwVendor" class="form-control">
+                        <option value="">-- Select Vendor --</option>
+                        <option value="1">Microsoft</option>
+                        <option value="2">Adobe</option>
+                        <option value="3">Trend Micro</option>
+                        <option value="4">ABBYY</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">License Key</label>
+                    <select id="instSwLicense" class="form-control">
+                        <option value="">-- No License (Free/Trial) --</option>
+                        <option value="1">MS-001 (Microsoft License)</option>
+                        <option value="2">AD-001 (Adobe License)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="font-weight: bold; font-size: 12px;">Software Type (License)</label>
+                    <select id="instSwLicenseType" class="form-control">
+                        <option value="PAID">PAID</option>
+                        <option value="FREEWARE">FREEWARE</option>
+                        <option value="TRIAL">TRIAL</option>
+                        <option value="OPEN_SOURCE">OPEN_SOURCE</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top: 15px;">
+                <label style="font-weight: bold; font-size: 12px;">Description / Notes</label>
+                <textarea id="instSwDesc" class="form-control" rows="2" style="padding: 8px;"></textarea>
+            </div>
+        </div>
+        <div class="modal-footer" style="text-align: right; padding: 15px; border-top: 1px solid #eee;">
+            <button style="padding: 8px 16px; background: #ccc; border: none; cursor: pointer; color: black; margin-right: 10px;"
+                onclick="closeModal('installSoftwareModal')">Cancel</button>
+            <button style="padding: 8px 16px; background: #000066; color: white; border: none; cursor: pointer; font-weight: bold;"
+                onclick="submitInstallSoftware()">Install Software</button>
+        </div>
+    </div>
+</div>

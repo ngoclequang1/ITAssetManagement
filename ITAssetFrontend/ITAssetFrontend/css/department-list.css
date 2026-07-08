@@ -1,0 +1,178 @@
+.dept-layout {
+    display: flex;
+    gap: 20px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    color: #333;
+    padding: 15px;
+    background: #f8f9fa;
+    min-height: 100vh;
+}
+
+/* === SIDEBAR (LEFT COLUMN) === */
+.dept-sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    background: #f0f4f8;
+    padding: 15px;
+    border: 1px solid #ccc;
+    height: fit-content;
+}
+
+.search-header {
+    background: #000066;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.search-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-bottom: 15px;
+}
+
+.tree-view {
+    background: white;
+    height: 150px;
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 15px;
+    overflow-y: auto;
+}
+
+.filter-group { margin-bottom: 10px; }
+.filter-group label { display: block; background: #dbeafc; padding: 5px; border-bottom: 1px solid #ccc; font-weight: normal; margin-bottom: 5px; }
+.form-control { width: 100%; padding: 4px; border: 1px solid #ccc; box-sizing: border-box; }
+.checkbox-container { background: white; padding: 5px; border: 1px solid #ccc; }
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.btn-danger { background: #d32f2f; color: white; border: none; padding: 8px; cursor: pointer; flex: 1; font-weight: bold; }
+.btn-secondary { background: #457b9d; color: white; border: none; padding: 8px; cursor: pointer; flex: 1; font-weight: bold; }
+.btn-outline { border: 1px solid #999; background: #fff; padding: 4px; cursor: pointer; font-size: 11px; text-align: center; }
+
+/* === MAIN CONTENT (RIGHT COLUMN) === */
+.dept-main {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+.toolbar-left, .toolbar-right { display: flex; align-items: center; gap: 10px; }
+.text-red { color: #cc0000; font-size: 15px; font-weight: bold; }
+select { padding: 4px; border: 1px solid #ccc; font-size: 12px; }
+
+/* PAGINATION */
+.pagination-mini { display: flex; gap: 3px; }
+.pagination-mini button { border: 1px solid #999; background: #fff; padding: 3px 8px; cursor: pointer; font-size: 12px; }
+.pagination-mini button.active { background: #4a86e8; color: white; border-color: #4a86e8; }
+
+/* === LIST & CARD === */
+.dept-list { display: flex; flex-direction: column; gap: 20px; }
+.dept-card { background: white; border: 1px solid #ccc; }
+
+.card-header {
+    background-color: #000066;
+    color: white;
+    padding: 6px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+.card-header-left a { color: white; text-decoration: underline; cursor: pointer; margin-left: 5px; }
+
+.btn-menu { background: #e0e0e0; border: 1px solid #999; padding: 2px 10px; cursor: pointer; font-weight: bold; color: #000; }
+
+/* === GRID 4 CỘT DỮ LIỆU === */
+.card-body {
+    display: grid;
+    grid-template-columns: 200px 1fr 200px 1fr;
+}
+.cell { padding: 12px; border-bottom: 1px solid #e0e0e0; border-right: 1px solid #e0e0e0; display: flex; align-items: center; }
+.cell:nth-child(4n) { border-right: none; }
+.cell:nth-last-child(-n+4) { border-bottom: none; }
+.cell-label { background-color: #dbeafc; color: #000; }
+.cell-value { background-color: #fff; color: #333; }
+/* =========================================================
+   STYLE CHO DROPDOWN MENU (ACTION MENU)
+========================================================= */
+.dropdown { position: relative; display: inline-block; }
+.btn-menu { background: #e0e0e0; border: 1px solid #999; padding: 2px 10px; cursor: pointer; font-weight: bold; color: #000; }
+.dropdown-content { display: none; position: absolute; right: 0; background-color: #fff; min-width: 180px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2); border: 1px solid #ccc; z-index: 1000; top: 100%; }
+.dropdown-content a { color: black; padding: 8px 12px; text-decoration: none; display: block; cursor: pointer; font-size: 12px; border-bottom: 1px dashed #eee; }
+.dropdown-content a:last-child { border-bottom: none; }
+.dropdown-content a:hover { background-color: #f1f1f1; color: #000066; font-weight: bold; }
+.dropdown-content.show { display: block; }
+
+/* =========================================================
+   STYLE CHO MODAL (POPUP)
+========================================================= */
+.modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+.modal-content { background-color: #fff; margin: 10% auto; width: 450px; border-radius: 4px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+.modal-header { padding: 12px 15px; background: #000066; color: white; display: flex; justify-content: space-between; align-items: center; }
+.modal-header h3 { margin: 0; font-size: 15px; }
+.close { color: white; font-size: 22px; cursor: pointer; line-height: 1; }
+.modal-body { padding: 15px; }
+.modal-footer { padding: 12px 15px; background: #f9f9f9; text-align: right; border-top: 1px solid #eee; }
+
+/* Table Detail Styles */
+.detail-table { border-collapse: collapse; margin-bottom: 10px; }
+.detail-table th, .detail-table td { border: 1px solid #ccc; padding: 8px; }
+.detail-table th { background: #dbeafc; font-weight: normal; }
+
+/* Rep Table Styles */
+.rep-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.rep-table th, .rep-table td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+.rep-table th { background: #000066; color: white; }
+.rep-table tr:nth-child(even) { background: #f2f2f2; }
+
+/* =========================================================
+   STYLE ĐẶC BIỆT CHO NÚT BẤM TRONG MODAL EDIT DEPARTMENT
+========================================================= */
+
+/* Nút Cancel (Màu xanh dương nhạt/xám xanh) */
+.btn-cancel {
+    background-color: #457b9d; /* Xanh dương nhạt */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+    margin-right: 8px;
+}
+
+.btn-cancel:hover {
+    background-color: #3b6986;
+}
+
+/* Nút Save Changes (Màu đỏ đặc trưng) */
+.btn-save-danger {
+    background-color: #d32f2f; /* Màu đỏ */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 13px;
+}
+
+.btn-save-danger:hover {
+    background-color: #b71c1c;
+}
+
+/* Ép form-group hiển thị nhãn (label) trên TextBox */
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 13px;
+}

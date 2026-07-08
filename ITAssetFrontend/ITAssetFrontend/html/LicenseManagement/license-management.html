@@ -1,0 +1,735 @@
+<link rel="stylesheet" href="../../css/license-management.css">
+
+<div class="license-layout">
+
+    <!-- ===================== SIDEBAR LỌC ===================== -->
+    <div class="license-sidebar">
+        <div class="search-header">Current search criteria</div>
+
+        <div class="search-actions">
+            <button class="btn-outline" onclick="searchLicense()">Search</button>
+            <button class="btn-outline" onclick="clearLicenseSearch()">Clear</button>
+            <button class="btn-outline" onclick="resetLicenseSearch()">Reset</button>
+            <button class="btn-outline">Expand fully</button>
+        </div>
+
+        <div class="filter-group">
+            <label>License Management Number</label>
+            <input type="text" id="filterLicMgmtNo" class="form-control" placeholder="e.g. LIC-00001">
+        </div>
+
+        <div class="filter-group">
+            <label>Installation Name</label>
+            <input type="text" id="filterInstallName" class="form-control" placeholder="e.g. Microsoft 365">
+        </div>
+
+        <div class="filter-group">
+            <label>Publisher Name</label>
+            <input type="text" id="filterPublisher" class="form-control" placeholder="e.g. Microsoft">
+        </div>
+
+        <div class="filter-group">
+            <label>Software Type</label>
+            <select id="filterSoftwareType" class="form-control">
+                <option value="">-- All --</option>
+                <option>Office Suite</option>
+                <option>Operating System</option>
+                <option>PDF Software</option>
+                <option>Development Tool</option>
+                <option>CAD Software</option>
+                <option>Scientific Computing</option>
+                <option>Antivirus</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>License Type</label>
+            <select id="filterLicenseType" class="form-control">
+                <option value="">-- All --</option>
+                <option>Subscription</option>
+                <option>Perpetual</option>
+                <option>Academic</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>Counting Method</label>
+            <select id="filterCountingMethod" class="form-control">
+                <option value="">-- All --</option>
+                <option>User</option>
+                <option>Device</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label>License Status</label>
+            <div class="checkbox-container">
+                <label><input type="checkbox" value="Active" class="filter-status-cb" checked> Active</label>
+                <label><input type="checkbox" value="Expired" class="filter-status-cb"> Expired</label>
+                <label><input type="checkbox" value="Disposed" class="filter-status-cb"> Disposed</label>
+            </div>
+        </div>
+
+        <div class="filter-group">
+            <label>Academic Flag</label>
+            <div class="checkbox-container">
+                <label><input type="checkbox" id="filterAcademic"> Academic only</label>
+            </div>
+        </div>
+
+        <div class="filter-actions">
+            <button class="btn-danger" onclick="searchLicense()">Search</button>
+            <button class="btn-secondary" onclick="clearLicenseSearch()">Clear</button>
+        </div>
+    </div>
+
+    <!-- ===================== MAIN CONTENT ===================== -->
+    <div class="license-main">
+
+        <!-- TOOLBAR TOP -->
+        <div class="toolbar">
+            <div class="toolbar-left">
+                <button class="btn-outline"
+                    style="background-color: #4a86e8; color: white; border: none; font-weight: bold; margin-right: 10px;"
+                    onclick="openNewApplicationModal()">+ New Application</button>
+
+                <div class="dropdown">
+                    <button class="btn-outline" onclick="toggleBulkDropdown(event, this)">Bulk Operation Menu ▼</button>
+                    <div class="dropdown-content" style="left: 0; right: auto;">
+                        <a onclick="selectAllLicenses(true)">▶ Select All</a>
+                        <a onclick="selectAllLicenses(false)">▶ Deselect All</a>
+                        <hr style="margin: 5px 0; border: 0; border-top: 1px solid #ddd;">
+                        <a onclick="downloadSelectedLicenses()">▶ Download Selected</a>
+                        <a onclick="downloadAllLicenses()">▶ Download All</a>
+                    </div>
+                </div>
+
+                <span class="showing-text">
+                    Showing <b id="licShowStartTop">0</b> - <b id="licShowEndTop">0</b>
+                    of <b class="text-red" id="licTotalTop">0</b> results
+                </span>
+            </div>
+            <div class="toolbar-right">
+                <select id="licPageSizeTop" onchange="changeLicPageSize(this.value)">
+                    <option value="10">10 Shows</option>
+                    <option value="20">20 Shows</option>
+                    <option value="50">50 Shows</option>
+                </select>
+                <span>Display order</span>
+                <select><option>License Management Number</option></select>
+                <select><option>Ascending order</option></select>
+                <div id="licPaginationTop" class="pagination-mini"></div>
+            </div>
+        </div>
+
+        <!-- DANH SÁCH LICENSE CARDS -->
+        <div id="licenseList" class="license-list"></div>
+
+        <!-- TOOLBAR BOTTOM -->
+        <div class="toolbar" style="margin-top: 15px;">
+            <div class="toolbar-left">
+                <button class="btn-outline"
+                    style="background-color: #4a86e8; color: white; border: none; font-weight: bold; margin-right: 10px;"
+                    onclick="openNewApplicationModal()">+ New Application</button>
+                <button class="btn-outline">Bulk Operation Menu</button>
+                <span class="showing-text">
+                    Showing <b id="licShowStartBottom">0</b> - <b id="licShowEndBottom">0</b>
+                    of <b class="text-red" id="licTotalBottom">0</b> results
+                </span>
+            </div>
+            <div class="toolbar-right">
+                <select id="licPageSizeBottom" onchange="changeLicPageSize(this.value)">
+                    <option value="10">10 Shows</option>
+                    <option value="20">20 Shows</option>
+                    <option value="50">50 Shows</option>
+                </select>
+                <div id="licPaginationBottom" class="pagination-mini"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: LICENSE DETAIL (READ ONLY)
+============================================================ -->
+<div id="licDetailModal" class="modal">
+    <div class="modal-content" style="width: 750px;">
+        <div class="modal-header">
+            <h3>License Details</h3>
+            <span class="close" onclick="closeLicModal('licDetailModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="max-height: 65vh; overflow-y: auto; padding: 20px;">
+            <table class="detail-table" id="licDetailTable" style="width: 100%;"></table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeLicModal('licDetailModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: NEW APPLICATION
+============================================================ -->
+<div id="licNewModal" class="modal">
+    <div class="modal-content" style="width: 720px;">
+        <div class="modal-header">
+            <h3>New License Application <span style="font-size:11px; font-weight:normal; margin-left:10px;">新規申請</span></h3>
+            <span class="close" onclick="closeLicModal('licNewModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 20px;">
+            <p style="margin-top:0; color:#555; font-size:12px; margin-bottom:15px;">
+                Register a new software license into the system. The license management number will be generated automatically after approval.
+            </p>
+
+            <div class="form-section-title">Software Information</div>
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>Installation Name <span class="badge-must">Must</span></label>
+                    <input type="text" id="newInstallName" class="form-control" placeholder="e.g. Microsoft 365 E5">
+                </div>
+                <div class="form-group">
+                    <label>Publisher Name</label>
+                    <input type="text" id="newPublisher" class="form-control" placeholder="e.g. Microsoft">
+                </div>
+                <div class="form-group">
+                    <label>Software Type <span class="badge-must">Must</span></label>
+                    <select id="newSoftwareType" class="form-control">
+                        <option value="">-- Select --</option>
+                        <option>Office Suite</option>
+                        <option>Operating System</option>
+                        <option>PDF Software</option>
+                        <option>Development Tool</option>
+                        <option>CAD Software</option>
+                        <option>Scientific Computing</option>
+                        <option>Antivirus</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>License Type <span class="badge-must">Must</span></label>
+                    <select id="newLicenseType" class="form-control">
+                        <option value="">-- Select --</option>
+                        <option>Subscription</option>
+                        <option>Perpetual</option>
+                        <option>Academic</option>
+                        <option>Trial</option>
+                        <option>Freeware</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>License Format <span class="badge-must">Must</span></label>
+                    <select id="newLicenseFormat" class="form-control">
+                        <option value="">-- Select --</option>
+                        <option>Digital</option>
+                        <option>DVD</option>
+                        <option>USB Key</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Counting Method <span class="badge-must">Must</span></label>
+                    <select id="newCountingMethod" class="form-control">
+                        <option value="">-- Select --</option>
+                        <option>User</option>
+                        <option>Device</option>
+                        <option>Core</option>
+                        <option>Processor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Number of Licenses <span class="badge-must">Must</span></label>
+                    <input type="number" id="newNumLicenses" class="form-control" min="1" placeholder="e.g. 100">
+                </div>
+                <div class="form-group">
+                    <label>License Key</label>
+                    <input type="text" id="newLicenseKey" class="form-control" placeholder="e.g. XXXXX-XXXXX-XXXXX">
+                </div>
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="date" id="newExpiryDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Management Department</label>
+                    <select id="newMgmtDept" class="form-control">
+                        <option value="">-- Select Department --</option>
+                    </select>
+                </div>
+                <div class="form-group form-full-row" style="grid-column: 1/-1;">
+                    <label style="display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" id="newAcademicFlag"> Academic Flag (Academic License)
+                    </label>
+                </div>
+                <div class="form-group form-full-row">
+                    <label>Description / Notes</label>
+                    <textarea id="newDescription" class="form-control" rows="2" style="padding: 6px;"></textarea>
+                </div>
+            </div>
+
+            <div class="approval-section">
+                <div class="form-section-title" style="color: #000066; margin-bottom: 10px;">Approval Route</div>
+                <div class="approval-row">
+                    <div class="approval-col">
+                        <label><input type="checkbox" id="secAppFlagNew" checked onchange="toggleSecApp('New')"> Secondary Approval Flag (On)</label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">First Approver <span class="badge-must">Must</span></label>
+                        <select id="firstAppNew" class="form-control">
+                            <option value="">-- Select Approver --</option>
+                        </select>
+                    </div>
+                    <div class="approval-col">
+                        <label style="visibility: hidden;">placeholder</label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">Secondary Approver <span class="badge-must" id="secAppBadgeNew">Must</span></label>
+                        <select id="secAppNew" class="form-control">
+                            <option value="">-- Select Approver --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeLicModal('licNewModal')">Cancel</button>
+            <button class="btn-save" onclick="submitNewApplication()">Confirmation</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: CHANGE APPLICATION
+============================================================ -->
+<div id="licChangeModal" class="modal">
+    <div class="modal-content" style="width: 680px;">
+        <div class="modal-header">
+            <h3>Change Application <span style="font-size:11px; font-weight:normal; margin-left:10px;">変更申請</span></h3>
+            <span class="close" onclick="closeLicModal('licChangeModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto; padding: 20px;">
+            <input type="hidden" id="changeLicId">
+
+            <div style="background: #f4f6f9; padding: 10px 15px; border: 1px solid #ddd; margin-bottom: 15px; border-radius: 2px;">
+                <div style="font-size: 12px; color: #555;">License Management Number (Read-only)</div>
+                <div id="changeLicMgmtNo" style="font-weight: bold; font-size: 15px; color: #000066; margin-top: 3px;">-</div>
+                <div id="changeLicInstallName" style="font-size: 12px; color: #666; margin-top: 2px;">-</div>
+            </div>
+
+            <div class="form-section-title">Edit Fields</div>
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label>Publisher Name</label>
+                    <input type="text" id="chgPublisher" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Software Type</label>
+                    <select id="chgSoftwareType" class="form-control">
+                        <option value="">-- No Change --</option>
+                        <option>Office Suite</option>
+                        <option>Operating System</option>
+                        <option>PDF Software</option>
+                        <option>Development Tool</option>
+                        <option>CAD Software</option>
+                        <option>Scientific Computing</option>
+                        <option>Antivirus</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>License Type</label>
+                    <select id="chgLicenseType" class="form-control">
+                        <option value="">-- No Change --</option>
+                        <option>Subscription</option>
+                        <option>Perpetual</option>
+                        <option>Academic</option>
+                        <option>Trial</option>
+                        <option>Freeware</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>License Format</label>
+                    <select id="chgLicenseFormat" class="form-control">
+                        <option value="">-- No Change --</option>
+                        <option>Digital</option>
+                        <option>DVD</option>
+                        <option>USB Key</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Counting Method</label>
+                    <select id="chgCountingMethod" class="form-control">
+                        <option value="">-- No Change --</option>
+                        <option>User</option>
+                        <option>Device</option>
+                        <option>Core</option>
+                        <option>Processor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Number of Licenses</label>
+                    <input type="number" id="chgNumLicenses" class="form-control" min="1" placeholder="Leave blank = no change">
+                </div>
+                <div class="form-group">
+                    <label>Expiry Date</label>
+                    <input type="date" id="chgExpiryDate" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Management Department</label>
+                    <select id="chgMgmtDept" class="form-control">
+                        <option value="">-- No Change --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label style="display:flex; align-items:center; gap:8px;">
+                        Academic Flag &nbsp;
+                        <select id="chgAcademicFlag" class="form-control" style="width: auto; min-width: 120px;">
+                            <option value="">-- No Change --</option>
+                            <option value="false">Non-Academic</option>
+                            <option value="true">Academic</option>
+                        </select>
+                    </label>
+                </div>
+                <div class="form-group form-full-row">
+                    <label>Description</label>
+                    <textarea id="chgDescription" class="form-control" rows="2" style="padding: 6px;" placeholder="Leave blank = no change"></textarea>
+                </div>
+            </div>
+
+            <div class="approval-section">
+                <div class="form-section-title" style="color: #000066; margin-bottom: 10px;">Approval Route</div>
+                <div class="approval-row">
+                    <div class="approval-col">
+                        <label><input type="checkbox" id="secAppFlagChange" checked onchange="toggleSecApp('Change')"> Secondary Approval Flag (On)</label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">First Approver <span class="badge-must">Must</span></label>
+                        <select id="firstAppChange" class="form-control">
+                            <option value="">-- Select Approver --</option>
+                        </select>
+                    </div>
+                    <div class="approval-col">
+                        <label style="visibility: hidden;">placeholder</label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">Secondary Approver <span class="badge-must" id="secAppBadgeChange">Must</span></label>
+                        <select id="secAppChange" class="form-control">
+                            <option value="">-- Select Approver --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeLicModal('licChangeModal')">Cancel</button>
+            <button class="btn-save" onclick="submitChangeApplication()">Submit Change Request</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: MOVE APPLICATION
+============================================================ -->
+<div id="licMoveModal" class="modal">
+    <div class="modal-content" style="width: 620px;">
+        <div class="modal-header">
+            <h3>Move Application <span style="font-size:11px; font-weight:normal; margin-left:10px;">移動申請</span></h3>
+            <span class="close" onclick="closeLicModal('licMoveModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="moveLicId">
+
+            <div style="background: #f4f6f9; padding: 10px 15px; border: 1px solid #ddd; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <div style="font-size: 11px; color: #777;">License Management Number</div>
+                        <div id="moveLicMgmtNo" style="font-weight: bold; color: #000066;">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: #777;">Installation Name</div>
+                        <div id="moveLicInstallName" style="font-weight: bold;">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: #777;">Current Department</div>
+                        <div id="moveLicCurrentDept" style="font-weight: bold; color: #d32f2f;">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: #777;">Current Manager</div>
+                        <div id="moveLicCurrentMgr" style="font-weight: bold;">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section-title">Destination</div>
+
+            <!-- Deployment destination (Department) – bắt buộc theo SKILL §3.3 -->
+            <div class="form-group">
+                <label>Deployment Destination (Department) <span class="badge-must">Must</span></label>
+                <select id="moveDeptId" class="form-control" style="border: 1px solid #000066;">
+                    <option value="">-- Select Destination Department --</option>
+                </select>
+            </div>
+
+            <!-- Person in charge of the location – bắt buộc theo SKILL §3.3 -->
+            <div class="form-group">
+                <label>Person in charge of the location <span class="badge-must">Must</span></label>
+                <select id="moveManagerUserId" class="form-control" style="border: 1px solid #000066;">
+                    <option value="">-- Select Person in Charge --</option>
+                </select>
+            </div>
+
+            <div class="approval-section">
+                <div class="form-section-title" style="color: #000066; margin-bottom: 10px;">Approval Route</div>
+                <div class="approval-row">
+                    <div class="approval-col">
+                        <label><input type="checkbox" id="secAppFlagMove" checked onchange="toggleSecApp('Move')"> Secondary Approval Flag (On)</label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">First Approver <span class="badge-must">Must</span></label>
+                        <select id="firstAppMove" class="form-control">
+                            <option value="">-- Select Approver --</option>
+                        </select>
+                    </div>
+                    <div class="approval-col">
+                        <label style="visibility: hidden;">placeholder</label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">Secondary Approver <span class="badge-must" id="secAppBadgeMove">Must</span></label>
+                        <select id="secAppMove" class="form-control">
+                            <option value="">-- Select Approver --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeLicModal('licMoveModal')">Cancel</button>
+            <button class="btn-save" onclick="submitMoveApplication()">Submit Move Request</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: SPLIT APPLICATION
+============================================================ -->
+<div id="licSplitModal" class="modal">
+    <div class="modal-content" style="width: 600px;">
+        <div class="modal-header">
+            <h3>Split Application <span style="font-size:11px; font-weight:normal; margin-left:10px;">分割申請</span></h3>
+            <span class="close" onclick="closeLicModal('licSplitModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="splitLicId">
+            <input type="hidden" id="splitLicAvailable">
+
+            <div style="background: #f4f6f9; padding: 10px 15px; border: 1px solid #ddd; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div>
+                        <div style="font-size: 11px; color: #777;">License Management Number</div>
+                        <div id="splitLicMgmtNo" style="font-weight: bold; color: #000066;">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: #777;">Installation Name</div>
+                        <div id="splitLicInstallName" style="font-weight: bold;">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: #777;">Total Licenses</div>
+                        <div id="splitLicTotal" style="font-weight: bold;">-</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 11px; color: #777;">Available Licenses</div>
+                        <div id="splitLicAvailDisplay" style="font-weight: bold; color: #1b5e20;">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section-title">Split Configuration</div>
+            <div class="form-group">
+                <label>Number of Licenses to Split <span class="badge-must">Must</span></label>
+                <input type="number" id="splitCount" class="form-control" min="1" placeholder="Must not exceed available count"
+                    oninput="updateSplitPreview()">
+                <div id="splitPreview" style="font-size: 12px; color: #555; margin-top: 5px;"></div>
+            </div>
+            <div class="form-group">
+                <label>Destination Department <span class="badge-must">Must</span></label>
+                <select id="splitDeptId" class="form-control" style="border: 1px solid #000066;">
+                    <option value="">-- Select Destination Department --</option>
+                </select>
+            </div>
+
+            <div class="approval-section">
+                <div class="form-section-title" style="color: #000066; margin-bottom: 10px;">Approval Route</div>
+                <div class="approval-row">
+                    <div class="approval-col">
+                        <label><input type="checkbox" id="secAppFlagSplit" checked onchange="toggleSecApp('Split')"> Secondary Approval Flag (On)</label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">First Approver <span class="badge-must">Must</span></label>
+                        <select id="firstAppSplit" class="form-control">
+                            <option value="">-- Select Approver --</option>
+                        </select>
+                    </div>
+                    <div class="approval-col">
+                        <label style="visibility: hidden;">placeholder</label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">Secondary Approver <span class="badge-must" id="secAppBadgeSplit">Must</span></label>
+                        <select id="secAppSplit" class="form-control">
+                            <option value="">-- Select Approver --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeLicModal('licSplitModal')">Cancel</button>
+            <button class="btn-save" onclick="submitSplitApplication()">Submit Split Request</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: DISPOSAL APPLICATION
+============================================================ -->
+<div id="licDisposalModal" class="modal">
+    <div class="modal-content" style="width: 560px;">
+        <div class="modal-header">
+            <h3>Disposal Application <span style="font-size:11px; font-weight:normal; margin-left:10px;">廃棄申請</span></h3>
+            <span class="close" onclick="closeLicModal('licDisposalModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px;">
+            <input type="hidden" id="disposalLicId">
+
+            <!-- Cảnh báo lỗi nếu license còn linked -->
+            <div id="disposalLinkedError" class="error-block" style="display: none;">
+                <span class="error-icon">⛔</span>
+                This license is still linked to devices/users. Please unlink all associations before disposal.
+            </div>
+
+            <div style="background: #f4f6f9; padding: 10px 15px; border: 1px solid #ddd; margin-bottom: 20px;">
+                <div style="font-size: 11px; color: #777;">License Management Number</div>
+                <div id="disposalLicMgmtNo" style="font-weight: bold; color: #000066; font-size: 15px; margin-top: 3px;">-</div>
+                <div id="disposalLicInstallName" style="font-size: 12px; color: #555; margin-top: 2px;">-</div>
+                <div style="margin-top: 8px; font-size: 12px;">
+                    Expected Status After Disposal:
+                    <span style="background: #263238; color: white; padding: 2px 8px; border-radius: 3px; font-size: 11px; font-weight: bold; margin-left: 6px;">Discarded</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Disposal Date <span class="badge-must">Must</span></label>
+                <input type="date" id="disposalDate" class="form-control">
+            </div>
+            <div class="form-group">
+                <label>Remarks</label>
+                <textarea id="disposalRemarks" class="form-control" rows="2" style="padding: 6px;"></textarea>
+            </div>
+
+            <div class="approval-section">
+                <div class="form-section-title" style="color: #000066; margin-bottom: 10px;">Approval Route</div>
+                <div class="approval-row">
+                    <div class="approval-col">
+                        <label><input type="checkbox" id="secAppFlagDisposal" checked onchange="toggleSecApp('Disposal')"> Secondary Approval Flag (On)</label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">First Approver <span class="badge-must">Must</span></label>
+                        <select id="firstAppDisposal" class="form-control">
+                            <option value="">-- Select Approver --</option>
+                        </select>
+                    </div>
+                    <div class="approval-col">
+                        <label style="visibility: hidden;">placeholder</label>
+                        <label style="font-weight: bold; font-size: 12px; margin-top: 8px; display: block;">Secondary Approver <span class="badge-must" id="secAppBadgeDisposal">Must</span></label>
+                        <select id="secAppDisposal" class="form-control">
+                            <option value="">-- Select Approver --</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeLicModal('licDisposalModal')">Cancel</button>
+            <button id="btnDisposalConfirm" class="btn-save-danger" onclick="submitDisposalApplication()">Confirmation</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: APPLICATION HISTORY
+============================================================ -->
+<div id="licAppHistoryModal" class="modal">
+    <div class="modal-content" style="width: 800px;">
+        <div class="modal-header">
+            <h3>Application History</h3>
+            <span class="close" onclick="closeLicModal('licAppHistoryModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="max-height: 400px; overflow-y: auto; padding: 20px;">
+            <table class="history-table" id="licAppHistoryTable" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Application ID</th>
+                        <th>Applicant</th>
+                        <th>Application Date</th>
+                        <th>Application Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="licAppHistoryBody"></tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeLicModal('licAppHistoryModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     MODAL: INVENTORY HISTORY
+============================================================ -->
+<div id="licInvHistoryModal" class="modal">
+    <div class="modal-content" style="width: 700px;">
+        <div class="modal-header">
+            <h3>Inventory History</h3>
+            <span class="close" onclick="closeLicModal('licInvHistoryModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="max-height: 400px; overflow-y: auto; padding: 20px;">
+            <table class="history-table" id="licInvHistoryTable" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th>Inventory Date</th>
+                        <th>Inventory Taker</th>
+                        <th>Result</th>
+                        <th>Remarks</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="licInvHistoryBody"></tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeLicModal('licInvHistoryModal')">Close</button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ============================================================
+     CUSTOM CONFIRM & ALERT MODAL
+============================================================ -->
+<div id="licConfirmModal" class="modal" style="z-index: 3000;">
+    <div class="modal-content" style="width: 400px; margin-top: 15%;">
+        <div class="modal-header">
+            <h3 id="licConfirmTitle">Confirm Action</h3>
+            <span class="close" onclick="closeLicModal('licConfirmModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px 15px;">
+            <p id="licConfirmMessage" style="margin: 0; font-size: 14px; line-height: 1.5;"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeLicModal('licConfirmModal')">Cancel</button>
+            <button class="btn-save" id="licBtnConfirmYes">Yes</button>
+        </div>
+    </div>
+</div>
+
+<div id="licAlertModal" class="modal" style="z-index: 3000;">
+    <div class="modal-content" style="width: 400px; margin-top: 15%;">
+        <div class="modal-header" id="licAlertHeader">
+            <h3 id="licAlertTitle">Notification</h3>
+            <span class="close" onclick="closeLicModal('licAlertModal')">&times;</span>
+        </div>
+        <div class="modal-body" style="padding: 20px 15px;">
+            <p id="licAlertMessage" style="margin: 0; font-size: 14px; line-height: 1.5;"></p>
+        </div>
+        <div class="modal-footer" style="text-align: center;">
+            <button class="btn-save" onclick="closeLicModal('licAlertModal')" style="min-width: 100px;">OK</button>
+        </div>
+    </div>
+</div>
