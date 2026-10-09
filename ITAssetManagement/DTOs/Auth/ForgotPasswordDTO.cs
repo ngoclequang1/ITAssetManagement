@@ -1,7 +1,9 @@
-﻿namespace ITAssetManagement.DTOs.Auth
+using System.ComponentModel.DataAnnotations;
+
+namespace ITAssetManagement.DTOs.Auth;
+
+public sealed class ForgotPasswordDTO
 {
-    public class ForgotPasswordDTO
-    {
-        public string LoginId { get; set; }
-    }
+    [Required, StringLength(100)]
+    public string LoginId { get; set; } = string.Empty;
 }

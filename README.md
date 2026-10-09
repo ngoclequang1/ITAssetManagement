@@ -190,6 +190,34 @@ Start the API:
 dotnet run
 ```
 
+Configure secrets outside source control (PowerShell example):
+
+```powershell
+cd ITAssetManagement
+dotnet user-secrets set "ConnectionStrings:DefaultConnection" "server=localhost;database=it_asset_management;user=root;password=YOUR_PASSWORD;ConvertZeroDateTime=True;"
+dotnet user-secrets set "Jwt:Key" "YOUR_RANDOM_SECRET_WITH_AT_LEAST_32_CHARACTERS"
+dotnet user-secrets set "Email:From" "YOUR_EMAIL"
+dotnet user-secrets set "Email:Password" "YOUR_APP_PASSWORD"
+dotnet user-secrets set "OpenAI:ApiKey" "YOUR_OPENAI_API_KEY"
+```
+
+## AI Asset Agent
+
+The authenticated `POST /api/ai-agent/ask` endpoint provides a read-only assistant grounded in
+the asset database. It can summarize inventory, find hardware, list expiring licenses, and inspect
+pending requests. It cannot write to the database or bypass the approval workflow.
+
+Example body:
+
+```json
+{
+  "question": "License nào sẽ hết hạn trong 60 ngày tới?"
+}
+```
+
+The response includes `toolsUsed` so callers can audit which internal data sources supported the
+answer. Set `OpenAI:Model` to a model available to your OpenAI project if needed.
+
 ---
 
 ## Frontend

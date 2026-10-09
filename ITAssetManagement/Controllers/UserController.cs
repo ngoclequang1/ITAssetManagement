@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using ITAssetManagement.Data;
 using ITAssetManagement.Models;
 using ITAssetManagement.DTOs.Users;
+using Microsoft.AspNetCore.Authorization;
+using ITAssetManagement.Authorization;
 
 namespace ITAssetManagement.Controllers
 {
@@ -198,6 +200,7 @@ namespace ITAssetManagement.Controllers
         // Delete User
         // =========================
         [HttpDelete("{id}")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> DeleteUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
@@ -215,6 +218,7 @@ namespace ITAssetManagement.Controllers
         // Update User
         // =========================
         [HttpPut("{id}")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UpdateUserRequest request)
         {
             var user = await _context.Users.FindAsync(id);
@@ -246,6 +250,7 @@ namespace ITAssetManagement.Controllers
         // Create User
         // =========================
         [HttpPost]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> CreateUser(CreateUserDto dto)
         {
             // Check email duplicate
@@ -279,6 +284,7 @@ namespace ITAssetManagement.Controllers
         // Copy User Registration
         // =========================
         [HttpPost("{id}/copy")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> CopyUser(int id)
         {
             var user = await _context.Users.FindAsync(id);

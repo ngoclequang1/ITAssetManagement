@@ -1,9 +1,12 @@
-﻿namespace ITAssetManagement.DTOs.Auth
+using System.ComponentModel.DataAnnotations;
+
+namespace ITAssetManagement.DTOs.Auth;
+
+public sealed class ChangePasswordDTO
 {
-    public class ChangePasswordDTO
-    {
-        public int UserId { get; set; }
-        public string OldPassword { get; set; }
-        public string NewPassword { get; set; }
-    }
+    [Required]
+    public string OldPassword { get; set; } = string.Empty;
+
+    [Required, MinLength(10)]
+    public string NewPassword { get; set; } = string.Empty;
 }

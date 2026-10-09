@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using ITAssetManagement.Data;
 using ITAssetManagement.Models;
 using ITAssetManagement.DTOs.Request;
+using Microsoft.AspNetCore.Authorization;
+using ITAssetManagement.Authorization;
+using System.Security.Claims;
 
 namespace ITAssetManagement.Controllers
 {
@@ -21,6 +24,7 @@ namespace ITAssetManagement.Controllers
         // 1. CREATE CHANGE REQUEST 
         // ===============================
         [HttpPost("change")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> CreateChangeRequest([FromBody] ChangeRequestDto dto)
         {
             var asset = await _context.ITAssets.FindAsync(dto.AssetId);
@@ -73,6 +77,7 @@ namespace ITAssetManagement.Controllers
         // 2. CREATE MOVE REQUEST 
         // ===============================
         [HttpPost("move")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> CreateMoveRequest([FromBody] MoveRequestDto dto)
         {
             var asset = await _context.ITAssets.FindAsync(dto.AssetId);
@@ -128,8 +133,12 @@ namespace ITAssetManagement.Controllers
         // 3. APPROVE REQUEST 
         // ===============================
         [HttpPut("{requestId}/approve")]
+        [Authorize(Policy = PermissionPolicies.CanApprove)]
         public async Task<IActionResult> ApproveRequest(int requestId, [FromBody] ApproveRequestDto dto)
         {
+            if (!int.TryParse(User.FindFirstValue("userId"), out var currentUserId))
+                return Unauthorized();
+
             var request = await _context.Requests.FindAsync(requestId);
             if (request == null)
                 return NotFound();
@@ -138,7 +147,7 @@ namespace ITAssetManagement.Controllers
                 return BadRequest("Request already approved");
 
             var approval = await _context.RequestApprovals
-                .FirstOrDefaultAsync(a => a.RequestId == requestId && a.ApproverId == dto.ApproverId);
+                .FirstOrDefaultAsync(a => a.RequestId == requestId && a.ApproverId == currentUserId);
 
             if (approval == null)
                 return BadRequest("Not allowed");
@@ -180,13 +189,17 @@ namespace ITAssetManagement.Controllers
         // BỔ SUNG: REJECT REQUEST 
         // ===============================
         [HttpPut("{requestId}/reject")]
+        [Authorize(Policy = PermissionPolicies.CanApprove)]
         public async Task<IActionResult> RejectRequest(int requestId, [FromBody] ApproveRequestDto dto)
         {
+            if (!int.TryParse(User.FindFirstValue("userId"), out var currentUserId))
+                return Unauthorized();
+
             var request = await _context.Requests.FindAsync(requestId);
             if (request == null) return NotFound();
 
             var approval = await _context.RequestApprovals
-                .FirstOrDefaultAsync(a => a.RequestId == requestId && a.ApproverId == dto.ApproverId);
+                .FirstOrDefaultAsync(a => a.RequestId == requestId && a.ApproverId == currentUserId);
 
             if (approval == null) return BadRequest("Not allowed");
             if (approval.StatusId != 1) return BadRequest("Already processed");
@@ -215,8 +228,14 @@ namespace ITAssetManagement.Controllers
         // BỔ SUNG: LẤY CÁC REQUEST CHỜ DUYỆT CỦA USER
         // ===============================
         [HttpGet("pending/{approverId}")]
+        [Authorize(Policy = PermissionPolicies.CanApprove)]
         public async Task<IActionResult> GetPendingApprovals(int approverId)
         {
+            if (!int.TryParse(User.FindFirstValue("userId"), out var currentUserId))
+                return Unauthorized();
+            if (approverId != currentUserId)
+                return Forbid();
+
             var pendingList = await _context.RequestApprovals
                 .Include(a => a.Request)
                     .ThenInclude(r => r.RequestType)
@@ -706,6 +725,7 @@ namespace ITAssetManagement.Controllers
         // 7. CREATE DISPOSAL / RETURN REQUEST
         // =====================================
         [HttpPost("disposal")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> CreateDisposalRequest([FromBody] DisposalRequestDto dto)
         {
             var asset = await _context.ITAssets.FindAsync(dto.AssetId);
@@ -761,6 +781,7 @@ namespace ITAssetManagement.Controllers
         // ===============================
 
         [HttpPost("failure")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> CreateFailureRequest([FromBody] FailureRequestDto dto)
         {
             var asset = await _context.ITAssets.FindAsync(dto.AssetId);
@@ -926,6 +947,7 @@ namespace ITAssetManagement.Controllers
         // ===============================
 
         [HttpPost("bulk/change")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> BulkChange([FromBody] BulkChangeRequestDto dto)
         {
             var assets = await _context.ITAssets
@@ -982,6 +1004,7 @@ namespace ITAssetManagement.Controllers
         }
 
         [HttpPost("bulk/move")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> BulkMove([FromBody] BulkMoveRequestDto dto)
         {
             var request = new Request
@@ -1037,6 +1060,7 @@ namespace ITAssetManagement.Controllers
         }
 
         [HttpPost("bulk/disposal")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> BulkDisposal([FromBody] BulkDisposalRequestDto dto)
         {
             int requestType = dto.IsDisposal ? 3 : 4;
@@ -1086,6 +1110,7 @@ namespace ITAssetManagement.Controllers
 
 
         [HttpPost("bulk/failure")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> BulkFailure([FromBody] BulkFailureRequestDto dto)
         {
             var assets = await _context.ITAssets

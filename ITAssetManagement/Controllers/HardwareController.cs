@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using ITAssetManagement.Data;
 using ITAssetManagement.Models;
+using Microsoft.AspNetCore.Authorization;
+using ITAssetManagement.Authorization;
 
 namespace ITAssetManagement.Controllers
 {
@@ -81,6 +83,7 @@ namespace ITAssetManagement.Controllers
         // 3. Create Hardware
         // ===============================
         [HttpPost]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> CreateHardware([FromBody] ITAsset asset)
         {
             asset.CreatedAt = DateTime.Now;
@@ -98,6 +101,7 @@ namespace ITAssetManagement.Controllers
         // 4. Update Hardware
         // ===============================
         [HttpPut("{id}")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> UpdateHardware(int id, [FromBody] ITAsset updatedAsset)
         {
             var asset = await _context.ITAssets.FindAsync(id);
@@ -123,6 +127,7 @@ namespace ITAssetManagement.Controllers
         // 5. Delete Hardware
         // ===============================
         [HttpDelete("{id}")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> DeleteHardware(int id)
         {
             var asset = await _context.ITAssets.FindAsync(id);

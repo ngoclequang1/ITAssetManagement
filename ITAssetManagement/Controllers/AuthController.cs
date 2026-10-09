@@ -3,6 +3,10 @@ using ITAssetManagement.Data;
 using ITAssetManagement.Models;
 using ITAssetManagement.Services;
 using ITAssetManagement.DTOs.Auth;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace ITAssetManagement.Controllers
 {
@@ -28,20 +32,23 @@ namespace ITAssetManagement.Controllers
         // REGISTER
         // =========================
         [HttpPost("register")]
+        [AllowAnonymous, EnableRateLimiting("auth")]
         public IActionResult Register(RegisterDTO dto)
         {
+            var normalizedUsername = dto.Username.Trim();
+            var normalizedEmail = dto.Email.Trim();
             var exist = _context.Users
-                .FirstOrDefault(x => x.Username == dto.Username);
+                .FirstOrDefault(x => x.Username == normalizedUsername || x.Email == normalizedEmail);
 
             if (exist != null)
-                return BadRequest("Username already exists");
+                return Conflict("Username or email already exists");
 
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
             var user = new User
             {
-                Username = dto.Username,
-                Email = dto.Email,
+                Username = normalizedUsername,
+                Email = normalizedEmail,
                 PasswordHash = passwordHash,
                 RoleId = 2,
                 CreatedAt = DateTime.UtcNow
@@ -57,19 +64,23 @@ namespace ITAssetManagement.Controllers
         // LOGIN
         // =========================
         [HttpPost("login")]
+        [AllowAnonymous, EnableRateLimiting("auth")]
         public IActionResult Login(LoginDTO dto)
         {
             var user = _context.Users
-                .FirstOrDefault(x => x.Username == dto.Username);
+                .FirstOrDefault(x => x.Username == dto.Username.Trim() && !x.IsDeleted);
 
             if (user == null)
-                return Unauthorized("Invalid username");
+                return Unauthorized("Invalid username or password");
 
             if (user.PasswordHash == null ||
                 !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
             {
-                return Unauthorized("Invalid password");
+                return Unauthorized("Invalid username or password");
             }
+
+            user.LastLogin = DateTime.UtcNow;
+            _context.SaveChanges();
 
             var token = _jwt.GenerateToken(user);
 
@@ -86,20 +97,18 @@ namespace ITAssetManagement.Controllers
         // FORGOT PASSWORD (LOGIN ID)
         // =========================
         [HttpPost("forgot-password")]
+        [AllowAnonymous, EnableRateLimiting("auth")]
         public IActionResult ForgotPassword(ForgotPasswordDTO dto)
         {
             var user = _context.Users.FirstOrDefault(x =>
                 x.SystemLoginId == dto.LoginId
             );
 
-            if (user == null)
-                return BadRequest("Login ID not found");
-
-            if (string.IsNullOrEmpty(user.Email))
-                return BadRequest("User has no email");
+            if (user == null || string.IsNullOrEmpty(user.Email))
+                return Ok("If the account exists, an OTP has been sent.");
 
             // Generate OTP 6 digits
-            var otp = new Random().Next(100000, 999999).ToString();
+            var otp = RandomNumberGenerator.GetInt32(100000, 1000000).ToString();
 
             user.ResetOtp = otp;
             user.ResetOtpExpiry = DateTime.UtcNow.AddMinutes(5);
@@ -113,13 +122,14 @@ namespace ITAssetManagement.Controllers
                 $"Your OTP is: {otp}\nThis code will expire in 5 minutes."
             );
 
-            return Ok("OTP sent to email");
+            return Ok("If the account exists, an OTP has been sent.");
         }
 
         // =========================
         // RESET PASSWORD (FROM EMAIL)
         // =========================
         [HttpPost("reset-password")]
+        [AllowAnonymous, EnableRateLimiting("auth")]
         public IActionResult ResetPassword(ResetPasswordDTO dto)
         {
             var user = _context.Users.FirstOrDefault(x =>
@@ -146,9 +156,14 @@ namespace ITAssetManagement.Controllers
         // CHANGE PASSWORD (AFTER LOGIN)
         // =========================
         [HttpPost("change-password")]
+        [Authorize]
         public IActionResult ChangePassword(ChangePasswordDTO dto)
         {
-            var user = _context.Users.FirstOrDefault(x => x.UserId == dto.UserId);
+            var userIdValue = User.FindFirstValue("userId");
+            if (!int.TryParse(userIdValue, out var userId))
+                return Unauthorized();
+
+            var user = _context.Users.FirstOrDefault(x => x.UserId == userId);
 
             if (user == null)
                 return NotFound("User not found");

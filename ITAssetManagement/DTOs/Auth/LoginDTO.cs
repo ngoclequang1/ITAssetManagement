@@ -1,8 +1,12 @@
-﻿namespace ITAssetManagement.DTOs.Auth
+using System.ComponentModel.DataAnnotations;
+
+namespace ITAssetManagement.DTOs.Auth;
+
+public sealed class LoginDTO
 {
-    public class LoginDTO
-    {
-        public string Username { get; set; } = "";
-        public string Password { get; set; } = "";
-    }
+    [Required, StringLength(100)]
+    public string Username { get; set; } = string.Empty;
+
+    [Required, MaxLength(128)]
+    public string Password { get; set; } = string.Empty;
 }

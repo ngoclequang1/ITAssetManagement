@@ -3,6 +3,8 @@ using ITAssetManagement.DTOs;
 using ITAssetManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using ITAssetManagement.Authorization;
 
 namespace ITAssetManagement.Controllers
 {
@@ -139,6 +141,7 @@ namespace ITAssetManagement.Controllers
         // Update Department Info
         // =========================
         [HttpPut("{id}")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> UpdateDepartment(int id, UpdateDepartmentDto dto)
         {
             var department = await _context.Departments.FindAsync(id);
@@ -156,6 +159,7 @@ namespace ITAssetManagement.Controllers
         // Update Department Status
         // =========================
         [HttpPut("{id}/status")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> UpdateDepartmentStatus(int id, UpdateDepartmentStatusDto dto)
         {
             var department = await _context.Departments.FindAsync(id);
@@ -177,6 +181,7 @@ namespace ITAssetManagement.Controllers
         // Create Department Copy
         // =========================
         [HttpPost("{id}/copy")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> CopyDepartment(int id)
         {
             var department = await _context.Departments.FindAsync(id);
@@ -201,6 +206,7 @@ namespace ITAssetManagement.Controllers
         // Create Department
         // =========================
         [HttpPost]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> CreateDepartment(CreateDepartmentDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.DepartmentCode))
@@ -241,6 +247,7 @@ namespace ITAssetManagement.Controllers
         //      vào DEPARTMENT_REPRESENTATIVE nếu chưa có
         // ============================================
         [HttpPost("{id}/assign-user")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> AssignUserToDepartment(int id, [FromBody] AssignUserDto dto)
         {
             var department = await _context.Departments.FindAsync(id);
@@ -297,6 +304,7 @@ namespace ITAssetManagement.Controllers
         // và clear PrimaryDepartmentId)
         // ============================================
         [HttpDelete("{id}/remove-user/{userId}")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> RemoveUserFromDepartment(int id, int userId)
         {
             var department = await _context.Departments.FindAsync(id);
@@ -328,6 +336,7 @@ namespace ITAssetManagement.Controllers
         // (dùng trong dropdown khi assign user)
         // ============================================
         [HttpGet("{id}/available-users")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> GetAvailableUsers(int id)
         {
             var users = await _context.Users

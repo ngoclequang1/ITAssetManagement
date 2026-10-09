@@ -4,11 +4,14 @@ using ITAssetManagement.Data;
 using ITAssetManagement.Models;
 using ITAssetManagement.DTOs.Import;
 using ClosedXML.Excel;
+using Microsoft.AspNetCore.Authorization;
+using ITAssetManagement.Authorization;
 
 namespace ITAssetManagement.Controllers
 {
     [Route("api/import")]
     [ApiController]
+    [Authorize(Policy = PermissionPolicies.CanAdmin)]
     public class ImportController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

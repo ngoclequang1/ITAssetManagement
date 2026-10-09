@@ -1,6 +1,8 @@
 ﻿using ITAssetManagement.Data;
 using ITAssetManagement.DTOs.Software;
 using ITAssetManagement.Models;
+using Microsoft.AspNetCore.Authorization;
+using ITAssetManagement.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -150,6 +152,7 @@ namespace ITAssetManagement.Controllers
         // 4. INSTALL SOFTWARE
         // ===============================
         [HttpPost("install")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> InstallSoftware([FromBody] InstallSoftwareDto dto)
         {
             if (string.IsNullOrEmpty(dto.SoftwareName) ||
@@ -202,6 +205,7 @@ namespace ITAssetManagement.Controllers
         // 5. CREATE SOFTWARE (no asset link)
         // ===============================
         [HttpPost]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> Create([FromBody] InstallSoftwareDto dto)
         {
             var software = new Software
@@ -226,6 +230,7 @@ namespace ITAssetManagement.Controllers
         // 6. UPDATE SOFTWARE
         // ===============================
         [HttpPut("{id}")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> Update(int id, [FromBody] InstallSoftwareDto dto)
         {
             var software = await _context.Softwares.FindAsync(id);
@@ -250,6 +255,7 @@ namespace ITAssetManagement.Controllers
         // Người dùng confirm trên frontend trước khi gọi endpoint này.
         // ===============================
         [HttpDelete("{id}")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> Uninstall(int id)
         {
             var software = await _context.Softwares
@@ -281,6 +287,7 @@ namespace ITAssetManagement.Controllers
         // Tạo REQUEST qua approval workflow – KHÔNG cập nhật trực tiếp DB
         // ===============================
         [HttpPost("{id}/change-application")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> ChangeApplication(int id, [FromBody] SoftwareChangeApplicationDto dto)
         {
             // --- Validate software tồn tại ---
@@ -428,6 +435,7 @@ namespace ITAssetManagement.Controllers
         // Qua approval workflow
         // ===============================
         [HttpPost("{id}/copy-request")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> CopyRequest(int id, [FromBody] SoftwareCopyRequestDto dto)
         {
             var sourceSoftware = await _context.Softwares
@@ -569,6 +577,7 @@ namespace ITAssetManagement.Controllers
         // 11. GROUP SOFTWARE
         // ===============================
         [HttpPost("group")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> GroupSoftware([FromBody] SoftwareGroupingDto dto)
         {
             if (dto.SoftwareIds == null || !dto.SoftwareIds.Any())
@@ -613,6 +622,7 @@ namespace ITAssetManagement.Controllers
         // 12. UNGROUP SOFTWARE
         // ===============================
         [HttpPost("ungroup")]
+        [Authorize(Policy = PermissionPolicies.CanAdmin)]
         public async Task<IActionResult> UngroupSoftware([FromBody] SoftwareGroupingDto dto)
         {
             if (dto.SoftwareIds == null || !dto.SoftwareIds.Any())

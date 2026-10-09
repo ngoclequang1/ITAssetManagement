@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Local secrets (use environment variables or dotnet user-secrets)
+ITAssetManagement/appsettings.Local.json

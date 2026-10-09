@@ -5,6 +5,9 @@ using ITAssetManagement.Models;
 using ITAssetManagement.DTOs.Request;
 using ITAssetManagement.Services;
 using System.Text.Json;
+using System.Security.Claims;
+using ITAssetManagement.Authorization;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ITAssetManagement.Controllers
 {
@@ -44,6 +47,12 @@ namespace ITAssetManagement.Controllers
         [HttpGet("permission/{userId}")]
         public async Task<IActionResult> GetPermission(int userId)
         {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId is null)
+                return Unauthorized();
+            if (userId != currentUserId && !await _permSvc.CanAdminAsync(currentUserId.Value))
+                return Forbid();
+
             var perm = await _permSvc.GetPermissionAsync(userId);
             if (perm != null)
             {
@@ -77,10 +86,14 @@ namespace ITAssetManagement.Controllers
         // Manager tạo request thêm mới tài sản
         // ─────────────────────────────────────────────────────────
         [HttpPost("add")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> RequestAddAsset([FromBody] AddAssetRequestDto dto)
         {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId is null) return Unauthorized();
+
             // 1. Kiểm tra quyền
-            if (!await _permSvc.CanRequestAsync(dto.UserCreatedId))
+            if (!await _permSvc.CanRequestAsync(currentUserId.Value))
                 return Forbid();
 
             // 2. Validate approver
@@ -137,7 +150,7 @@ namespace ITAssetManagement.Controllers
                 var request = new Request
                 {
                     RequestTypeId      = 12, // ADD_ASSET
-                    UserCreatedId      = dto.UserCreatedId,
+                    UserCreatedId      = currentUserId.Value,
                     TargetDiv          = null,
                     StatusId           = 1,  // Pending
                     RequestDescription = $"Add Asset Request: {dto.AssetName} ({dto.AssetControlNumber})",
@@ -220,10 +233,14 @@ namespace ITAssetManagement.Controllers
         //  nhưng thêm permission check ở đây)
         // ─────────────────────────────────────────────────────────
         [HttpPost("edit/{assetId}")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> RequestEditAsset(int assetId, [FromBody] ChangeRequestDto dto)
         {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId is null) return Unauthorized();
+
             // Permission check
-            if (!await _permSvc.CanRequestAsync(dto.UserCreatedId))
+            if (!await _permSvc.CanRequestAsync(currentUserId.Value))
                 return Forbid();
 
             var asset = await _context.ITAssets.FindAsync(assetId);
@@ -245,7 +262,7 @@ namespace ITAssetManagement.Controllers
                 var request = new Request
                 {
                     RequestTypeId      = 1, // CHANGE
-                    UserCreatedId      = dto.UserCreatedId,
+                    UserCreatedId      = currentUserId.Value,
                     AssetId            = assetId,
                     TargetDiv          = null,
                     StatusId           = 1,
@@ -310,10 +327,14 @@ namespace ITAssetManagement.Controllers
         // Manager tạo request xóa tài sản
         // ─────────────────────────────────────────────────────────
         [HttpPost("delete")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> RequestDeleteAsset([FromBody] DeleteAssetRequestDto dto)
         {
+            var currentUserId = GetCurrentUserId();
+            if (currentUserId is null) return Unauthorized();
+
             // Permission check
-            if (!await _permSvc.CanRequestAsync(dto.UserCreatedId))
+            if (!await _permSvc.CanRequestAsync(currentUserId.Value))
                 return Forbid();
 
             var asset = await _context.ITAssets.FindAsync(dto.AssetId);
@@ -334,7 +355,7 @@ namespace ITAssetManagement.Controllers
                 var request = new Request
                 {
                     RequestTypeId      = 13, // DELETE_ASSET
-                    UserCreatedId      = dto.UserCreatedId,
+                    UserCreatedId      = currentUserId.Value,
                     AssetId            = dto.AssetId,
                     TargetDiv          = null,
                     StatusId           = 1,
@@ -404,6 +425,9 @@ namespace ITAssetManagement.Controllers
                 return StatusCode(500, new { message = "An error occurred.", detail = ex.InnerException?.Message ?? ex.Message });
             }
         }
+
+        private int? GetCurrentUserId() =>
+            int.TryParse(User.FindFirstValue("userId"), out var userId) ? userId : null;
 
         private string GetCurrentUser() => HttpContext?.User?.Identity?.Name ?? "system";
     }

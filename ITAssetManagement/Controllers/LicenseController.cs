@@ -3,6 +3,8 @@ using ITAssetManagement.DTOs.License;
 using ITAssetManagement.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using ITAssetManagement.Authorization;
 
 namespace ITAssetManagement.Controllers
 {
@@ -288,6 +290,7 @@ namespace ITAssetManagement.Controllers
         // Khi Approve xong, ApplyNewLicense() chỉ cần update status → "Active".
         // ===============================
         [HttpPost("new-application")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> NewApplication([FromBody] LicenseNewApplicationDto dto)
         {
             // --- Validate input ---
@@ -485,6 +488,7 @@ namespace ITAssetManagement.Controllers
         // 7. CHANGE APPLICATION (変更申請)
         // ===============================
         [HttpPost("{id}/change-application")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> ChangeApplication(int id, [FromBody] LicenseChangeApplicationDto dto)
         {
             var license = await _context.Licenses
@@ -631,6 +635,7 @@ namespace ITAssetManagement.Controllers
         // 8. MOVE APPLICATION (移動申請)
         // ===============================
         [HttpPost("{id}/move-application")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> MoveApplication(int id, [FromBody] LicenseMoveApplicationDto dto)
         {
             var license = await _context.Licenses
@@ -751,6 +756,7 @@ namespace ITAssetManagement.Controllers
         // 9. SPLIT APPLICATION (分割申請)
         // ===============================
         [HttpPost("{id}/split-application")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> SplitApplication(int id, [FromBody] LicenseSplitApplicationDto dto)
         {
             var license = await _context.Licenses
@@ -869,6 +875,7 @@ namespace ITAssetManagement.Controllers
         // 10. DISPOSAL APPLICATION (廃棄申請)
         // ===============================
         [HttpPost("{id}/disposal-application")]
+        [Authorize(Policy = PermissionPolicies.CanRequest)]
         public async Task<IActionResult> DisposalApplication(int id, [FromBody] LicenseDisposalApplicationDto dto)
         {
             var license = await _context.Licenses
